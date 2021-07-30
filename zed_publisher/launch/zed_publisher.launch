@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<launch>
+
+	<!-- Launch file arguments -->
+	<arg name="show_rviz" default="false"/>
+	<!-- <arg name="auto_enable" default="true"/> -->
+	<!-- <arg name="broadcast_tf" default="true"/> -->
+
+	<!-- Show RViz -->
+	<node if="$(arg show_rviz)" name="zed_publisher_rviz" pkg="rviz" type="rviz" args="-d $(find zed_publisher)/config/sample.rviz"/>
+
+	<!-- Load the configuration file -->
+	<rosparam command="load" file="$(find zed_publisher)/config/config.yaml"/>
+
+	<!-- Adjust the TF frame according to your configuration file and setup-->
+	<!-- <node if="$(arg broadcast_tf)" pkg="tf" type="static_transform_publisher" name="zed_broadcaster" args="0 0 0 -1.5707 0 0 world zed2_camera_center 100"/> -->
+
+	<!-- Start the node -->
+	<node pkg="zed_publisher" type="zed_publisher" name="zed_publisher" output="screen"/>
+
+	<!-- Call the activation service -->
+	<!-- <node pkg="rosservice" type="rosservice" name="zed_activator" args="call /zed_human_tracking/set_state $(arg auto_enable)"/> -->
+
+</launch>

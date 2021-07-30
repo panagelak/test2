@@ -1,0 +1,19 @@
+zed_publisher:
+  #Enabled: false # Disable if you want to wait for the service to enable the module
+  #Static: true # If the camera is statically placed or moving
+  #Floor: true # If the camera is statically placed then floor detection will make it smoother
+  Frequency: 30 # The operating frequency in Hz. Tune depending on needs and resolution performance
+  #Mode: 2 # The depth detection mode: 1: Performance, 2: Quality, 3: Ultra
+  Model: 3 # The skeleton detection model: 2: Fast, 3: Accurate
+  #Threshold: 50 # The confidence threshold for the human detection (1-99). Higher speeds up the process.
+  # The mode of the image
+  # 0: Left, 1: Right, 2: LeftGray, 3: RightGray, 4: LeftUnrectified, 5: RightUnrectified, 6: LeftUnrectifiedGray
+  # 7: RightUnrectifiedGray, 8: SideBySide, 9: LeftDepth, 10: Condidence, 11: LeftNormals, 12: RightDepth, 13: RightNormals
+  LensMode: 0
+  Resolution: 3 # 0: 2K=2208*1242@15FPS, 1: FHD=1920*1080@30FPS, 2: HD=1280*720@60FPS, 3: VGA=672*376@100FPS
+  PublishImage: true
+  TopicImage: "image"
+  ImageFrame: "zed2_left_camera_frame" # The TF frame the image originates from. Change depending on the LensMode
+  #PublishSkeletons: true
+  #TopicSkeletons: "skeletons"
+  #SkeletonFrame: "zed2_camera_center" # The TF frame the joint coordinates originate from
