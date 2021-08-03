@@ -6,6 +6,7 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/synchronizer.h>
 #include <ros/ros.h>
+#include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/CompressedImage.h>
 #include <sensor_msgs/Image.h>
 #include <vector>
@@ -21,10 +22,11 @@ typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sens
 class PcSerializer
 {
 public:
-    PcSerializer() : nh_(""), depth_sub_(nh_, "input_depth", 1), image_sub_(nh_, "input_image", 1), sync_(MySyncPolicy(1), depth_sub_, image_sub_), first_(true)
+    PcSerializer() : nh_(""), depth_sub_(nh_, "input_depth", 1), image_sub_(nh_, "input_image", 1), sync_(MySyncPolicy(1), depth_sub_, image_sub_), first_(true), got_camera_info_(false)
     {
         sync_.registerCallback(boost::bind(&PcSerializer::callback, this, _1, _2));
         pc_comp_pub_ = nh_.advertise<integration::PclTransfer>("transfer_topic", 0, false);
+        camera_info_sub_ = nh_.subscribe("input_camera_info", 1, &PcSerializer::callback_info, this);
     }
     uint as_uint(const float x)
     {
@@ -48,11 +50,20 @@ public:
         const uint m = b & 0x007FFFFF;                                                                                                                                                      // mantissa; in line below: 0x007FF000 = 0x00800000-0x00001000 = decimal indicator flag - initial rounding
         return (b & 0x80000000) >> 16 | (e > 112) * ((((e - 112) << 10) & 0x7C00) | m >> 13) | ((e < 113) & (e > 101)) * ((((0x007FF000 + m) >> (125 - e)) + 1) >> 1) | (e > 143) * 0x7FFF; // sign : normalized : denormalized : saturate
     }
+    void callback_info(const sensor_msgs::CameraInfo::ConstPtr &msg)
+    {
+        camera_info_msg_ = *msg;
+        got_camera_info_ = true;
+    }
     void callback(const sensor_msgs::ImageConstPtr &depth_msg, const sensor_msgs::CompressedImageConstPtr &image_msg)
     {
+        if (!got_camera_info_)
+            return;
         compress_msg_.header.stamp = ros::Time::now();
         compress_msg_.header.frame_id = "";
         compress_msg_.rgb_image = *image_msg;
+        compress_msg_.camera_info = camera_info_msg_;
+        compress_msg_.camera_info.header = depth_msg->header;
 
         compress_msg_.depth_image.header = depth_msg->header;
         compress_msg_.depth_image.width = depth_msg->width;
@@ -83,6 +94,9 @@ protected:
     message_filters::Synchronizer<MySyncPolicy> sync_;
     ros::Publisher pc_comp_pub_;
     integration::PclTransfer compress_msg_;
+    ros::Subscriber camera_info_sub_;
+    sensor_msgs::CameraInfo camera_info_msg_;
+    bool got_camera_info_;
     bool first_;
 };
 

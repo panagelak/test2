@@ -23,6 +23,7 @@ public:
         transfer_sub_ = nh_.subscribe("input_pcl_transfer", 1, &PcDeserializer::callback, this);
         im_pub_ = nh_.advertise<sensor_msgs::CompressedImage>("image_out", 0, false);
         depth_pub_ = nh_.advertise<sensor_msgs::Image>("depth_out", 0, false);
+        camera_info_pub_ = nh_.advertise<sensor_msgs::Image>("camera_info_out", 0, false);
         // pcl_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("pcl_out", 0, false);
     }
     uint as_uint(const float x)
@@ -69,16 +70,17 @@ public:
                 if (d == 0 || d > 100)
                     d = std::nanf("");
                 memcpy((uchar *)(&depth_image_msg_.data[row * depth_image_msg_.step + 4 * col]), &d, 4);
-
             }
         }
         im_pub_.publish(msg->rgb_image);
         depth_pub_.publish(depth_image_msg_);
+        camera_info_pub_.publish(msg->camera_info);
     }
 
 protected:
     ros::NodeHandle nh_;
     ros::Publisher im_pub_;
+    ros::Publisher camera_info_pub_;
     ros::Publisher depth_pub_;
     ros::Publisher pcl_pub_;
     ros::Subscriber transfer_sub_;

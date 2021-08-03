@@ -9,6 +9,7 @@
     <!-- <remap from="input_pointcloud" to="/zed2/zed_node/point_cloud/cloud_registered"/> -->
     <remap from="input_depth" to="/zed2/zed_node/depth/depth_registered"/>
     <remap from="input_image" to="/zed2/zed_node/rgb/image_rect_color/compressed"/>
+    <remap from="input_camera_info" to="/zed2/zed_node/depth/camera_info"/>
     <remap from="transfer_topic" to="/transfer_pcl"/>
   </node>
 
