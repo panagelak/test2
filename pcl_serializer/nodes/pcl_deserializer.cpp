@@ -3,6 +3,7 @@
 #include <integration/PclTransfer.h>
 #include <iostream>
 #include <ros/ros.h>
+#include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/image_encodings.h>
@@ -18,13 +19,15 @@ typedef unsigned char uchar;
 class PcDeserializer
 {
 public:
-    PcDeserializer() : nh_(""), first_(true)
+    PcDeserializer() : nh_(""), first_(true), got_camera_info_(false)
     {
         transfer_sub_ = nh_.subscribe("input_pcl_transfer", 1, &PcDeserializer::callback, this);
         im_pub_ = nh_.advertise<sensor_msgs::CompressedImage>("image_out", 0, false);
         depth_pub_ = nh_.advertise<sensor_msgs::Image>("depth_out", 0, false);
-        camera_info_pub_ = nh_.advertise<sensor_msgs::Image>("camera_info_out", 0, false);
-        // pcl_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("pcl_out", 0, false);
+        camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("camera_info_out", 0, false);
+        // wait for first camera_info msg
+        auto msg = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("/zed2/zed_node/depth/camera_info", ros::Duration(0.0));
+        camera_info_msg_ = *msg;
     }
     uint as_uint(const float x)
     {
@@ -72,9 +75,11 @@ public:
                 memcpy((uchar *)(&depth_image_msg_.data[row * depth_image_msg_.step + 4 * col]), &d, 4);
             }
         }
+
         im_pub_.publish(msg->rgb_image);
         depth_pub_.publish(depth_image_msg_);
-        camera_info_pub_.publish(msg->camera_info);
+        camera_info_msg_.header = depth_image_msg_.header;
+        camera_info_pub_.publish(camera_info_msg_);
     }
 
 protected:
@@ -85,8 +90,10 @@ protected:
     ros::Publisher pcl_pub_;
     ros::Subscriber transfer_sub_;
     sensor_msgs::Image depth_image_msg_;
+    // sensor_msgs::CompressedImage image_msg_;
+    sensor_msgs::CameraInfo camera_info_msg_;
     // sensor_msgs::PointCloud2 pcl_msg_;
-    bool first_;
+    bool first_, got_camera_info_;
 };
 
 int main(int argc, char **argv)

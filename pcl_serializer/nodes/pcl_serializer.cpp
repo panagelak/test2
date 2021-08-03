@@ -26,7 +26,7 @@ public:
     {
         sync_.registerCallback(boost::bind(&PcSerializer::callback, this, _1, _2));
         pc_comp_pub_ = nh_.advertise<integration::PclTransfer>("transfer_topic", 0, false);
-        camera_info_sub_ = nh_.subscribe("input_camera_info", 1, &PcSerializer::callback_info, this);
+        // camera_info_sub_ = nh_.subscribe("input_camera_info", 1, &PcSerializer::callback_info, this);
     }
     uint as_uint(const float x)
     {
@@ -57,13 +57,13 @@ public:
     }
     void callback(const sensor_msgs::ImageConstPtr &depth_msg, const sensor_msgs::CompressedImageConstPtr &image_msg)
     {
-        if (!got_camera_info_)
-            return;
+        // if (!got_camera_info_)
+        //     return;
         compress_msg_.header.stamp = ros::Time::now();
         compress_msg_.header.frame_id = "";
         compress_msg_.rgb_image = *image_msg;
-        compress_msg_.camera_info = camera_info_msg_;
-        compress_msg_.camera_info.header = depth_msg->header;
+        // compress_msg_.camera_info = camera_info_msg_;
+        // compress_msg_.camera_info.header = depth_msg->header;
 
         compress_msg_.depth_image.header = depth_msg->header;
         compress_msg_.depth_image.width = depth_msg->width;
@@ -94,7 +94,7 @@ protected:
     message_filters::Synchronizer<MySyncPolicy> sync_;
     ros::Publisher pc_comp_pub_;
     integration::PclTransfer compress_msg_;
-    ros::Subscriber camera_info_sub_;
+    // ros::Subscriber camera_info_sub_;
     sensor_msgs::CameraInfo camera_info_msg_;
     bool got_camera_info_;
     bool first_;

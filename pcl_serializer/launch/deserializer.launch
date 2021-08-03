@@ -5,6 +5,7 @@
     <remap from="input_pcl_transfer" to="/transfer_pcl"/>
     <remap from="image_out" to="/zed2/image_compressed"/>
     <remap from="depth_out" to="/zed2/depth_registered"/>
+    <!-- <remap from="camera_info_in" to="/zed2/zed_node/depth/camera_info"/> -->
     <remap from="camera_info_out" to="/zed2/camera_info"/>
   </node>
 
@@ -15,6 +16,7 @@
     <remap from="camera_info" to="/zed2/camera_info"/>
     <remap from="image_rect" to="/zed2/depth_registered"/>
     <remap from="points" to="/zed2/point_cloud"/>
+    
   </node>
  
 
