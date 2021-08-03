@@ -3,7 +3,6 @@ project(pcl_serializer)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++14)
-find_package(numpy)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs 
@@ -14,6 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   std_msgs
   integration
+  image_transport
+  cv_bridge
 )
 
 #find_package(PCL 1.7 REQUIRED)
