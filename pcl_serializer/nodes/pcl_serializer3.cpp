@@ -1,6 +1,7 @@
 #include <chrono>
 #include <cmath>
 #include <integration/PclTransfer.h>
+#include <integration/SendPcl.h>
 #include <iostream>
 #include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/approximate_time.h>
@@ -25,7 +26,8 @@ public:
     PcSerializer() : nh_(""), depth_sub_(nh_, "input_depth", 1), image_sub_(nh_, "input_image", 1), sync_(MySyncPolicy(1), depth_sub_, image_sub_), first_(true), got_camera_info_(false)
     {
         sync_.registerCallback(boost::bind(&PcSerializer::callback, this, _1, _2));
-        pc_comp_pub_ = nh_.advertise<integration::PclTransfer>("transfer_topic", 0, false);
+        client_ = nh_.serviceClient<integration::SendPcl>("send_pcl");
+        // pc_comp_pub_ = nh_.advertise<integration::PclTransfer>("transfer_topic", 0, false);
         // camera_info_sub_ = nh_.subscribe("input_camera_info", 1, &PcSerializer::callback_info, this);
     }
     uint as_uint(const float x)
@@ -59,32 +61,39 @@ public:
     {
         // if (!got_camera_info_)
         //     return;
-        compress_msg_.header.stamp = ros::Time::now();
-        compress_msg_.header.frame_id = "";
-        compress_msg_.rgb_image = *image_msg;
-        // compress_msg_.camera_info = camera_info_msg_;
-        // compress_msg_.camera_info.header = depth_msg->header;
 
-        compress_msg_.depth_image.header = depth_msg->header;
-        compress_msg_.depth_image.width = depth_msg->width;
-        compress_msg_.depth_image.step = depth_msg->step / 2.;
-        compress_msg_.depth_image.encoding = depth_msg->encoding;
-        compress_msg_.depth_image.is_bigendian = depth_msg->is_bigendian;
-        compress_msg_.depth_image.height = depth_msg->height;
-        compress_msg_.depth_image.width = depth_msg->width;
-        if (first_)
-            compress_msg_.depth_image.data.resize(compress_msg_.depth_image.height * compress_msg_.depth_image.width * 2);
+        pcl_req_.request.transfer_msg.header.stamp = ros::Time::now();
+        pcl_req_.request.transfer_msg.header.frame_id = "";
+        pcl_req_.request.transfer_msg.rgb_image = *image_msg;
+        // pcl_req_.request.transfer_msg.camera_info = camera_info_msg_;
+        // pcl_req_.request.transfer_msg.camera_info.header = depth_msg->header;
 
+        pcl_req_.request.transfer_msg.depth_image.header = depth_msg->header;
+        pcl_req_.request.transfer_msg.depth_image.width = depth_msg->width;
+        pcl_req_.request.transfer_msg.depth_image.step = depth_msg->step / 2.;
+        pcl_req_.request.transfer_msg.depth_image.encoding = depth_msg->encoding;
+        pcl_req_.request.transfer_msg.depth_image.is_bigendian = depth_msg->is_bigendian;
+        pcl_req_.request.transfer_msg.depth_image.height = depth_msg->height;
+        pcl_req_.request.transfer_msg.depth_image.width = depth_msg->width;
+        if (first_) {
+            pcl_req_.request.transfer_msg.depth_image.data.resize(pcl_req_.request.transfer_msg.depth_image.height * pcl_req_.request.transfer_msg.depth_image.width * 2);
+            client_.waitForExistence();
+        }
         for (size_t row = 0; row < depth_msg->height; row++) {
             for (size_t col = 0; col < depth_msg->width; col++) {
                 float d;
                 memcpy((uchar *)(&d), &depth_msg->data[row * depth_msg->step + 4 * col], 4);
                 d *= 0.1;
                 ushort fs = float_to_half(d);
-                memcpy((uchar *)(&compress_msg_.depth_image.data[row * compress_msg_.depth_image.step + 2 * col]), &fs, 2);
+                memcpy((uchar *)(&pcl_req_.request.transfer_msg.depth_image.data[row * pcl_req_.request.transfer_msg.depth_image.step + 2 * col]), &fs, 2);
             }
         }
-        pc_comp_pub_.publish(compress_msg_);
+
+        if (!client_.call(pcl_req_)) {
+            ROS_ERROR("Failed to call service");
+        }
+
+        // pc_comp_pub_.publish(pcl_req_.request.transfer_msg);
     }
 
 protected:
@@ -92,10 +101,12 @@ protected:
     message_filters::Subscriber<sensor_msgs::Image> depth_sub_;
     message_filters::Subscriber<sensor_msgs::CompressedImage> image_sub_;
     message_filters::Synchronizer<MySyncPolicy> sync_;
-    ros::Publisher pc_comp_pub_;
+    // ros::Publisher pc_comp_pub_;
     integration::PclTransfer compress_msg_;
     // ros::Subscriber camera_info_sub_;
     sensor_msgs::CameraInfo camera_info_msg_;
+    ros::ServiceClient client_;
+    integration::SendPcl pcl_req_;
     bool got_camera_info_;
     bool first_;
 };

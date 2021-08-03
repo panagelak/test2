@@ -1,7 +1,6 @@
 #include <chrono>
 #include <cmath>
 #include <integration/PclTransfer.h>
-#include <integration/SendPcl.h>
 #include <iostream>
 #include <ros/ros.h>
 #include <sensor_msgs/CameraInfo.h>
@@ -22,8 +21,7 @@ class PcDeserializer
 public:
     PcDeserializer() : nh_(""), first_(true), got_camera_info_(false)
     {
-        // transfer_sub_ = nh_.subscribe("input_pcl_transfer", 30, &PcDeserializer::callback, this);
-        transfer_service_ = nh_.advertiseService("send_pcl", &PcDeserializer::callback, this);
+        transfer_sub_ = nh_.subscribe("input_pcl_transfer", 30, &PcDeserializer::callback, this);
         im_pub_ = nh_.advertise<sensor_msgs::CompressedImage>("image_out", 0, false);
         depth_pub_ = nh_.advertise<sensor_msgs::Image>("depth_out", 0, false);
         camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("camera_info_out", 0, false);
@@ -53,25 +51,24 @@ public:
         const uint m = b & 0x007FFFFF;                                                                                                                                                      // mantissa; in line below: 0x007FF000 = 0x00800000-0x00001000 = decimal indicator flag - initial rounding
         return (b & 0x80000000) >> 16 | (e > 112) * ((((e - 112) << 10) & 0x7C00) | m >> 13) | ((e < 113) & (e > 101)) * ((((0x007FF000 + m) >> (125 - e)) + 1) >> 1) | (e > 143) * 0x7FFF; // sign : normalized : denormalized : saturate
     }
-    bool callback(integration::SendPcl::Request &req, integration::SendPcl::Response &res)
+    void callback(const integration::PclTransfer::ConstPtr &msg)
     {
-        
         if (first_) {
-            depth_image_msg_.header = req.transfer_msg.depth_image.header;
+            depth_image_msg_.header = msg->depth_image.header;
             depth_image_msg_.header.frame_id = "world";
-            depth_image_msg_.width = req.transfer_msg.depth_image.width;
-            depth_image_msg_.step = req.transfer_msg.depth_image.step * 2;
-            depth_image_msg_.encoding = req.transfer_msg.depth_image.encoding;
-            depth_image_msg_.is_bigendian = req.transfer_msg.depth_image.is_bigendian;
-            depth_image_msg_.height = req.transfer_msg.depth_image.height;
-            depth_image_msg_.width = req.transfer_msg.depth_image.width;
-            depth_image_msg_.data.resize(req.transfer_msg.depth_image.height * req.transfer_msg.depth_image.width * 4);
+            depth_image_msg_.width = msg->depth_image.width;
+            depth_image_msg_.step = msg->depth_image.step * 2;
+            depth_image_msg_.encoding = msg->depth_image.encoding;
+            depth_image_msg_.is_bigendian = msg->depth_image.is_bigendian;
+            depth_image_msg_.height = msg->depth_image.height;
+            depth_image_msg_.width = msg->depth_image.width;
+            depth_image_msg_.data.resize(msg->depth_image.height * msg->depth_image.width * 4);
             first_ = false;
         }
-        for (size_t row = 0; row < req.transfer_msg.depth_image.height; row++) {
-            for (size_t col = 0; col < req.transfer_msg.depth_image.width; col++) {
+        for (size_t row = 0; row < msg->depth_image.height; row++) {
+            for (size_t col = 0; col < msg->depth_image.width; col++) {
                 ushort fs;
-                memcpy((uchar *)(&fs), &req.transfer_msg.depth_image.data[row * req.transfer_msg.depth_image.step + 2 * col], 2);
+                memcpy((uchar *)(&fs), &msg->depth_image.data[row * msg->depth_image.step + 2 * col], 2);
                 float d = half_to_float(fs);
                 d *= 10;
                 if (d == 0 || d > 100)
@@ -79,18 +76,16 @@ public:
                 memcpy((uchar *)(&depth_image_msg_.data[row * depth_image_msg_.step + 4 * col]), &d, 4);
             }
         }
-        depth_image_msg_.header = req.transfer_msg.header;
+        depth_image_msg_.header = msg->header;
         depth_image_msg_.header.frame_id = "world";
         ros::Time now = ros::Time::now();
-        ROS_INFO("Compress Diff %f", now.toSec() - req.transfer_msg.header.stamp.toSec());
+        ROS_INFO("Compress Diff %f", now.toSec() - msg->header.stamp.toSec());
         ROS_INFO("Depth Diff %f", now.toSec() - depth_image_msg_.header.stamp.toSec());
-        ROS_INFO("Image Diff %f", now.toSec() - req.transfer_msg.rgb_image.header.stamp.toSec());
-        im_pub_.publish(req.transfer_msg.rgb_image);
+        ROS_INFO("Image Diff %f", now.toSec() - msg->rgb_image.header.stamp.toSec());
+        im_pub_.publish(msg->rgb_image);
         depth_pub_.publish(depth_image_msg_);
         camera_info_msg_.header = depth_image_msg_.header;
         camera_info_pub_.publish(camera_info_msg_);
-        res.success = true;
-        return res.success;
     }
 
 protected:
@@ -99,8 +94,7 @@ protected:
     ros::Publisher camera_info_pub_;
     ros::Publisher depth_pub_;
     ros::Publisher pcl_pub_;
-    ros::ServiceServer transfer_service_;
-    // ros::Subscriber transfer_sub_;
+    ros::Subscriber transfer_sub_;
     sensor_msgs::Image depth_image_msg_;
     // sensor_msgs::CompressedImage image_msg_;
     sensor_msgs::CameraInfo camera_info_msg_;

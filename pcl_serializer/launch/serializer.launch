@@ -10,7 +10,7 @@
     <remap from="input_depth" to="/zed2/zed_node/depth/depth_registered"/>
     <remap from="input_image" to="/zed2/zed_node/rgb/image_rect_color/compressed"/>
     <!-- <remap from="input_camera_info" to="/zed2/zed_node/depth/camera_info"/> -->
-    <!-- <remap from="transfer_topic" to="/transfer_pcl"/> -->
+    <remap from="transfer_topic" to="/transfer_pcl"/>
   </node>
 
   <!-- <node name="pcl_deserializer" pkg="detectron2_pcl_sync" type="pcl_deserializer"  output = "screen">
