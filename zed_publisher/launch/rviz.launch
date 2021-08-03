@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+	<!-- Launch file arguments -->
+	<arg name="show_rviz" default="true"/>
+
+	<!-- Show RViz -->
+	<node if="$(arg show_rviz)" name="zed_publisher_rviz" pkg="rviz" type="rviz" args="-d $(find zed_publisher)/config/sample.rviz"/>
+
+</launch>

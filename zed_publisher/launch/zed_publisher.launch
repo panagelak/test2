@@ -2,7 +2,7 @@
 <launch>
 
 	<!-- Launch file arguments -->
-	<arg name="show_rviz" default="false"/>
+	<arg name="show_rviz" default="true"/>
 	<!-- <arg name="auto_enable" default="true"/> -->
 	<!-- <arg name="broadcast_tf" default="true"/> -->
 

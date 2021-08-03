@@ -17,6 +17,8 @@ find_package(catkin REQUIRED COMPONENTS
 	sensor_msgs
 	geometry_msgs
 	message_filters
+	image_transport
+	# compress_depth_image_transport
 )
 
 find_package(Boost REQUIRED COMPONENTS system program_options thread)
@@ -37,6 +39,8 @@ catkin_package(CATKIN_DEPENDS
 	sensor_msgs
 	geometry_msgs
 	message_filters
+	image_transport
+	# compress_depth_image_transport
 )
 
 include_directories(${catkin_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS} ${ZED_INCLUDE_DIRS} include)
@@ -46,6 +50,14 @@ add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_generate_messages_cpp)
 target_compile_options(${PROJECT_NAME} PRIVATE)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${CUDA_CUDA_LIBRARY} ${CUDA_LIBRARY} ${ZED_LIBRARIES} ${CUDA_CUDART_LIBRARY} ${CUDA_DEP_LIBRARIES_ZED})
 install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
+add_executable(decompress src/decompress.cpp)
+target_link_libraries(decompress ${catkin_LIBRARIES})
+add_dependencies(decompress ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(camera_test src/camera_test.cpp)
+target_link_libraries(camera_test ${catkin_LIBRARIES})
+add_dependencies(camera_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 # Find OGRE for RViz
 #find_package(PkgConfig REQUIRED)

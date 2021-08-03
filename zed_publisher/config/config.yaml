@@ -2,7 +2,7 @@ zed_publisher:
   #Enabled: false # Disable if you want to wait for the service to enable the module
   #Static: true # If the camera is statically placed or moving
   #Floor: true # If the camera is statically placed then floor detection will make it smoother
-  Frequency: 30 # The operating frequency in Hz. Tune depending on needs and resolution performance
+  Frequency: 100 # The operating frequency in Hz. Tune depending on needs and resolution performance
   #Mode: 2 # The depth detection mode: 1: Performance, 2: Quality, 3: Ultra
   Model: 3 # The skeleton detection model: 2: Fast, 3: Accurate
   #Threshold: 50 # The confidence threshold for the human detection (1-99). Higher speeds up the process.

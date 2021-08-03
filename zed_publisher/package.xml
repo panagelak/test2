@@ -28,6 +28,9 @@
 	<exec_depend>std_msgs</exec_depend>
 	<exec_depend>geometry_msgs</exec_depend>
 	<exec_depend>sensor_msgs</exec_depend>
+	<depend>image_transport</depend>
+	<!-- <depend>compress_depth_image_transport</depend> -->
+	
 
 	<depend>message_filters</depend>
 	<depend>class_loader</depend>

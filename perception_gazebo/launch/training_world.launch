@@ -1,0 +1,43 @@
+<launch>
+
+  <!--Load urdf to param server-->
+  <param name="robot_description" command="$(find xacro)/xacro '$(find perception_gazebo)/urdf/robots/sensor_stick.urdf.xacro'"/>
+
+  <!--GUI used to send fake joint values-->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+
+  <!--Publish robot state to TF-->
+  <arg name="use_tf_static" default="false"/>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+    <param name="use_tf_static" value="$(arg use_tf_static)"/>
+    <remap from="/joint_states" to="/sensor_stick/joint_states" />
+  </node>
+
+  <!--Load the joint controllers to param server-->
+  <rosparam file="$(find perception_gazebo)/controller/controllers.yaml" command="load"/>
+
+  <!--Load controllers pan and tilt-->
+  <node name="spawner" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" ns="/sensor_stick" args="joint_state_controller
+    pan_position_controller
+    tilt_position_controller"/>
+
+  <arg name="gui" default="true"/>
+  <!--Launch a gazebo world-->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="gui" value="$(arg gui)"/>
+    <!--arg name="headless" value="true"/-->
+  </include>
+
+  <!--spawn a robot in gazebo world-->
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+  args="-urdf -param robot_description -x 0 -y 1.8 -z 0 -R 0 -P 0 -Y 0 -model sensor_stick"/>
+
+  <!-- launch RViz-->
+  <!--include file="$(find perception_gazebo)/launch/rviz.launch">
+    <arg name="config" value="simple"/>
+  </include-->
+
+  <!-- <node name="spawn_models" pkg="perception_gazebo" type="spawn_models.py"/> -->
+
+</launch>

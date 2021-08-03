@@ -17,13 +17,13 @@ int main(int argc, char **argv)
     Publisher ZEDPublisher(&nh);
 
     int Frequency;
-    nh.param<int>("Frequency", Frequency, 30);
+    nh.param<int>("Frequency", Frequency, 100);
     ros::Rate rate(Frequency);
 
     while (ros::ok()) {
         ZEDPublisher.Publish();
         ros::spinOnce();
-        rate.sleep();
+        //rate.sleep();
     }
 
     ROS_INFO("Exiting.");
