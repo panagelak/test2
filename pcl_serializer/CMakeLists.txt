@@ -14,7 +14,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   integration
   image_transport
-  cv_bridge
 )
 
 #find_package(PCL 1.7 REQUIRED)

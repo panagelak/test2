@@ -2,7 +2,7 @@
 
   <node name="pcl_deserializer" pkg="pcl_serializer" type="pcl_deserializer"  output = "screen">
     <!-- <remap from="input_pointcloud" to="/zed2/zed_node/point_cloud/cloud_registered"/> -->
-    <remap from="input_pcl_transfer" to="/transfer_pcl"/>
+    <!-- <remap from="input_pcl_transfer" to="/transfer_pcl"/> -->
     <remap from="image_out" to="/zed2/image_compressed"/>
     <remap from="depth_out" to="/zed2/depth_registered"/>
     <!-- <remap from="camera_info_in" to="/zed2/zed_node/depth/camera_info"/> -->
