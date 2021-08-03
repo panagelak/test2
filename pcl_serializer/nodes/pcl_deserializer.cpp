@@ -7,6 +7,7 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/image_encodings.h>
+#include <std_msgs/Float32.h>
 #include <vector>
 
 using namespace std::chrono;
@@ -25,6 +26,7 @@ public:
         im_pub_ = nh_.advertise<sensor_msgs::CompressedImage>("image_out", 0, false);
         depth_pub_ = nh_.advertise<sensor_msgs::Image>("depth_out", 0, false);
         camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("camera_info_out", 0, false);
+        delay_pub_ = nh_.advertise<std_msgs::Float32>("delay", 0, true);
         // wait for first camera_info msg
         auto msg = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("/zed2/zed_node/depth/camera_info", ros::Duration(0.0));
         camera_info_msg_ = *msg;
@@ -79,9 +81,12 @@ public:
         depth_image_msg_.header = msg->header;
         depth_image_msg_.header.frame_id = "world";
         ros::Time now = ros::Time::now();
+        std_msgs::Float32 delay_msg;
+        delay_msg.data = now.toSec() - msg->header.stamp.toSec();
         ROS_INFO("Compress Diff %f", now.toSec() - msg->header.stamp.toSec());
         ROS_INFO("Depth Diff %f", now.toSec() - depth_image_msg_.header.stamp.toSec());
         ROS_INFO("Image Diff %f", now.toSec() - msg->rgb_image.header.stamp.toSec());
+        delay_pub_.publish(delay_msg);
         im_pub_.publish(msg->rgb_image);
         depth_pub_.publish(depth_image_msg_);
         camera_info_msg_.header = depth_image_msg_.header;
@@ -94,6 +99,7 @@ protected:
     ros::Publisher camera_info_pub_;
     ros::Publisher depth_pub_;
     ros::Publisher pcl_pub_;
+    ros::Publisher delay_pub_;
     ros::Subscriber transfer_sub_;
     sensor_msgs::Image depth_image_msg_;
     // sensor_msgs::CompressedImage image_msg_;

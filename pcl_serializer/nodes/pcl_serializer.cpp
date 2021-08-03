@@ -9,8 +9,8 @@
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/CompressedImage.h>
 #include <sensor_msgs/Image.h>
+#include <std_msgs/Float32.h>
 #include <vector>
-
 using namespace std::chrono;
 
 typedef unsigned short ushort;
@@ -25,7 +25,8 @@ public:
     PcSerializer() : nh_(""), depth_sub_(nh_, "input_depth", 1), image_sub_(nh_, "input_image", 1), sync_(MySyncPolicy(1), depth_sub_, image_sub_), first_(true), got_camera_info_(false)
     {
         sync_.registerCallback(boost::bind(&PcSerializer::callback, this, _1, _2));
-        pc_comp_pub_ = nh_.advertise<integration::PclTransfer>("transfer_topic", 0, true);
+        pc_comp_pub_ = nh_.advertise<integration::PclTransfer>("transfer_topic", 1, true);
+        delay_sub_ = nh_.subscribe("delay", 1, &PcSerializer::delay_callback, this);
         // camera_info_sub_ = nh_.subscribe("input_camera_info", 1, &PcSerializer::callback_info, this);
     }
     uint as_uint(const float x)
@@ -54,6 +55,10 @@ public:
     {
         camera_info_msg_ = *msg;
         got_camera_info_ = true;
+    }
+    void delay_callback(const std_msgs::Float32::ConstPtr &msg)
+    {
+        delay_ = msg->data;
     }
     void callback(const sensor_msgs::ImageConstPtr &depth_msg, const sensor_msgs::CompressedImageConstPtr &image_msg)
     {
@@ -84,7 +89,8 @@ public:
                 memcpy((uchar *)(&compress_msg_.depth_image.data[row * compress_msg_.depth_image.step + 2 * col]), &fs, 2);
             }
         }
-        pc_comp_pub_.publish(compress_msg_);
+        if (delay_ < 0.1)
+            pc_comp_pub_.publish(compress_msg_);
     }
 
 protected:
@@ -94,8 +100,10 @@ protected:
     message_filters::Synchronizer<MySyncPolicy> sync_;
     ros::Publisher pc_comp_pub_;
     integration::PclTransfer compress_msg_;
+    ros::Subscriber delay_sub_;
     // ros::Subscriber camera_info_sub_;
     sensor_msgs::CameraInfo camera_info_msg_;
+    float delay_;
     bool got_camera_info_;
     bool first_;
 };
