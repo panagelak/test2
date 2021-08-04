@@ -2,12 +2,12 @@
 <launch>
 
     <!-- <arg name="address" default="150.140.148.251" /> -->
-    <arg name="mqqt_address" default="localhost"/>
+    <arg name="mqqt_address" default="192.168.1.101"/>
     <arg name="mqqt_port" default="8883"/>
     <arg name="sender" default="false"/>
 
     <!--MQQT Bridge-->
-    <node name="digitaltwin_mqtt_bridge" pkg="digitaltwin_bridge" type="digitaltwin_bridge_node.py" output="screen" />
+    <node name="digitaltwin_mqtt_bridge2" pkg="digitaltwin_bridge" type="digitaltwin_bridge_node.py" output="screen" >
         <param name="port" type="str" value="$(arg mqqt_port)"/>
         <param name="address" type="str" value="$(arg mqqt_address)"/>
         <param name="sender" type="bool" value="$(arg sender)"/>
