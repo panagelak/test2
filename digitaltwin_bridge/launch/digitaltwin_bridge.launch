@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+    <!-- <arg name="address" default="150.140.148.251" /> -->
+    <arg name="mqqt_address" default="localhost"/>
+    <arg name="mqqt_port" default="8883"/>
+    <arg name="sender" default="true"/>
+
+    <!--MQQT Bridge-->
+    <node name="digitaltwin_mqtt_bridge" pkg="digitaltwin_bridge" type="digitaltwin_bridge_node.py" output="screen" />
+        <param name="port" type="str" value="$(arg mqqt_port)"/>
+        <param name="address" type="str" value="$(arg mqqt_address)"/>
+    </node>
+
+    <!--Unity Bridge-->
+    <!-- <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/> -->
+        <!--arg name="port" value="$(arg unity_port)" /-->
+        <!--arg name="address" value="$(arg unity_address)" /-->
+    <!--/include-->
+
+</launch>

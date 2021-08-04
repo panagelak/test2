@@ -84,9 +84,9 @@ public:
         std_msgs::Float32 delay_msg;
         delay_msg.data = now.toSec() - msg->header.stamp.toSec();
         ROS_INFO("Compress Diff %f", now.toSec() - msg->header.stamp.toSec());
-        ROS_INFO("Depth Diff %f", now.toSec() - depth_image_msg_.header.stamp.toSec());
-        ROS_INFO("Image Diff %f", now.toSec() - msg->rgb_image.header.stamp.toSec());
-        delay_pub_.publish(delay_msg);
+        // ROS_INFO("Depth Diff %f", now.toSec() - depth_image_msg_.header.stamp.toSec());
+        // ROS_INFO("Image Diff %f", now.toSec() - msg->rgb_image.header.stamp.toSec());
+        // delay_pub_.publish(delay_msg);
         im_pub_.publish(msg->rgb_image);
         depth_pub_.publish(depth_image_msg_);
         camera_info_msg_.header = depth_image_msg_.header;

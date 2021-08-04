@@ -89,8 +89,8 @@ public:
                 memcpy((uchar *)(&compress_msg_.depth_image.data[row * compress_msg_.depth_image.step + 2 * col]), &fs, 2);
             }
         }
-        if (delay_ < 0.1)
-            pc_comp_pub_.publish(compress_msg_);
+        // if (delay_ < 0.1)
+        pc_comp_pub_.publish(compress_msg_);
     }
 
 protected:
@@ -103,7 +103,7 @@ protected:
     ros::Subscriber delay_sub_;
     // ros::Subscriber camera_info_sub_;
     sensor_msgs::CameraInfo camera_info_msg_;
-    float delay_;
+    float delay_ = 0;
     bool got_camera_info_;
     bool first_;
 };
