@@ -40,19 +40,23 @@ class MqttRosBridge(object):
 
 
     def __del__(self):
-        self._client_send_pcl.loop_stop()
-        self._client_send_pcl.disconnect()
-        self._client_receive_pcl.loop_stop()
-        self._client_receive_pcl.disconnect()
+        if self._sender == True:
+            self._client_send_pcl.loop_stop()
+            self._client_send_pcl.disconnect()
+        if self._sender == False:
+            self._client_receive_pcl.loop_stop()
+            self._client_receive_pcl.disconnect()
 
     def send_pcl_callback(self, data):
-        json_data = json_message_converter.convert_ros_message_to_json(data)
-        self._client_send_pcl.publish("transfer_pcl", json_data)
+        if self._sender == True:
+            json_data = json_message_converter.convert_ros_message_to_json(data)
+            self._client_send_pcl.publish("transfer_pcl", json_data)
 
     def on_receive_pcl(self, client, userdata, message):
-        ros_data = json_message_converter.convert_json_to_ros_message(
-            'integration/PclTransfer', message.payload)
-        self._receive_pcl_pub.publish(ros_data)
+        if self._sender == False:
+            ros_data = json_message_converter.convert_json_to_ros_message(
+                'integration/PclTransfer', message.payload)
+            self._receive_pcl_pub.publish(ros_data)
 
 
     def on_log(self, client, userdata, level, buf):
