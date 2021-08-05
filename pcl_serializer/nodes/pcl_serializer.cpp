@@ -71,6 +71,8 @@ public:
     compress_msg_.rgb_image = *image_msg;
     compress_msg_.depth_image = depth_image_compressor_.encodeDepthImage(*depth_msg, "png", 10., 100., 9);
 
+    ROS_INFO("Compress Image size is : %d", compress_msg_.rgb_image.data.size());
+    ROS_INFO("Compress Depth Image size is : %d", compress_msg_.depth_image.data.size());
     // compress_msg_.depth_image.header = depth_msg->header;
     // compress_msg_.depth_image.width = depth_msg->width;
     // compress_msg_.depth_image.step = depth_msg->step / 2.;
