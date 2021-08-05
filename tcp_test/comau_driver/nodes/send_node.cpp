@@ -2,12 +2,12 @@
 
 #include <comau_driver/comau_driver.h>
 
-boost::shared_ptr<comau_driver::ComauRobot> robot_ptr_;
+std::unique_ptr<comau_driver::ComauRobot> robot_ptr_;
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "send_node");
-  ros::AsyncSpinner spinner(2);
-  spinner.start();
+  // ros::AsyncSpinner spinner(2);
+  // spinner.start();
 
   ros::NodeHandle nh("");
 
@@ -15,7 +15,8 @@ int main(int argc, char **argv) {
   bool is_receiver = false;
   // std::string ip_address = "192.168.1.101";
   // std::string port = "1102";
-  std::string ip_address = "192.168.56.2";
+  // std::string ip_address = "192.168.56.2";
+  std::string ip_address = "150.140.148.219";
   std::string port = "1104";
   std::string log_tag = "robot_tcp_server";
 
@@ -38,11 +39,13 @@ int main(int argc, char **argv) {
     image_array[i] = 0;
 
   while (true) {
+    ROS_INFO("Writing");
     robot_ptr_->writeImage(image_size, image_array);
     image_array[0] += 1;
     image_array[1] += 1;
     image_array[2] += 1;
     ros::Duration(0.1).sleep();
+    ros::spinOnce();
   }
 
   return 0;

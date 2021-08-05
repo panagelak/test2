@@ -2,7 +2,7 @@
 
 #include <comau_driver/comau_driver.h>
 
-boost::shared_ptr<comau_driver::ComauRobot> robot_ptr_;
+std::unique_ptr<comau_driver::ComauRobot> robot_ptr_;
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "receive_node");
@@ -13,9 +13,10 @@ int main(int argc, char **argv) {
 
   // parameters
   bool is_receiver = true;
-  // std::string ip_address = "192.168.1.101";
+  std::string ip_address = "192.168.1.110";
   // std::string port = "1104"; // 54000
-  std::string ip_address = "192.168.56.2";
+  // std::string ip_address = "192.168.56.2";
+    // std::string ip_address = "150.140.148.219";
   std::string port = "1104";
   std::string log_tag = "state_tcp_server";
 
