@@ -21,7 +21,7 @@
   <depend>std_msgs</depend>
   <depend>integration</depend>
   <depend>image_transport</depend>
-  
+  <depend>compress_depth_image</depend>
 
   <export>
   </export>

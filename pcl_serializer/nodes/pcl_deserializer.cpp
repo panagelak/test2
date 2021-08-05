@@ -9,7 +9,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <std_msgs/Float32.h>
 #include <vector>
-
+#include <compress_depth_image/decompressed_depth.h>
 using namespace std::chrono;
 
 typedef unsigned short ushort;
@@ -31,59 +31,60 @@ public:
         auto msg = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("/zed2/zed_node/depth/camera_info", ros::Duration(0.0));
         camera_info_msg_ = *msg;
     }
-    uint as_uint(const float x)
-    {
-        return *(uint *)&x;
-    }
-    float as_float(const uint x)
-    {
-        return *(float *)&x;
-    }
-    float half_to_float(const ushort x)
-    {                                                                                                                                                        // IEEE-754 16-bit floating-point format (without infinity): 1-5-10, exp-15, +-131008.0, +-6.1035156E-5, +-5.9604645E-8, 3.311 digits
-        const uint e = (x & 0x7C00) >> 10;                                                                                                                   // exponent
-        const uint m = (x & 0x03FF) << 13;                                                                                                                   // mantissa
-        const uint v = as_uint((float)m) >> 23;                                                                                                              // evil log2 bit hack to count leading zeros in denormalized format
-        return as_float((x & 0x8000) << 16 | (e != 0) * ((e + 112) << 23 | m) | ((e == 0) & (m != 0)) * ((v - 37) << 23 | ((m << (150 - v)) & 0x007FE000))); // sign : normalized : denormalized
-    }
-    ushort float_to_half(const float x)
-    {                                                                                                                                                                                       // IEEE-754 16-bit floating-point format (without infinity): 1-5-10, exp-15, +-131008.0, +-6.1035156E-5, +-5.9604645E-8, 3.311 digits
-        const uint b = as_uint(x) + 0x00001000;                                                                                                                                             // round-to-nearest-even: add last bit after truncated mantissa
-        const uint e = (b & 0x7F800000) >> 23;                                                                                                                                              // exponent
-        const uint m = b & 0x007FFFFF;                                                                                                                                                      // mantissa; in line below: 0x007FF000 = 0x00800000-0x00001000 = decimal indicator flag - initial rounding
-        return (b & 0x80000000) >> 16 | (e > 112) * ((((e - 112) << 10) & 0x7C00) | m >> 13) | ((e < 113) & (e > 101)) * ((((0x007FF000 + m) >> (125 - e)) + 1) >> 1) | (e > 143) * 0x7FFF; // sign : normalized : denormalized : saturate
-    }
+    // uint as_uint(const float x)
+    // {
+    //     return *(uint *)&x;
+    // }
+    // float as_float(const uint x)
+    // {
+    //     return *(float *)&x;
+    // }
+    // float half_to_float(const ushort x)
+    // {                                                                                                                                                        // IEEE-754 16-bit floating-point format (without infinity): 1-5-10, exp-15, +-131008.0, +-6.1035156E-5, +-5.9604645E-8, 3.311 digits
+    //     const uint e = (x & 0x7C00) >> 10;                                                                                                                   // exponent
+    //     const uint m = (x & 0x03FF) << 13;                                                                                                                   // mantissa
+    //     const uint v = as_uint((float)m) >> 23;                                                                                                              // evil log2 bit hack to count leading zeros in denormalized format
+    //     return as_float((x & 0x8000) << 16 | (e != 0) * ((e + 112) << 23 | m) | ((e == 0) & (m != 0)) * ((v - 37) << 23 | ((m << (150 - v)) & 0x007FE000))); // sign : normalized : denormalized
+    // }
+    // ushort float_to_half(const float x)
+    // {                                                                                                                                                                                       // IEEE-754 16-bit floating-point format (without infinity): 1-5-10, exp-15, +-131008.0, +-6.1035156E-5, +-5.9604645E-8, 3.311 digits
+    //     const uint b = as_uint(x) + 0x00001000;                                                                                                                                             // round-to-nearest-even: add last bit after truncated mantissa
+    //     const uint e = (b & 0x7F800000) >> 23;                                                                                                                                              // exponent
+    //     const uint m = b & 0x007FFFFF;                                                                                                                                                      // mantissa; in line below: 0x007FF000 = 0x00800000-0x00001000 = decimal indicator flag - initial rounding
+    //     return (b & 0x80000000) >> 16 | (e > 112) * ((((e - 112) << 10) & 0x7C00) | m >> 13) | ((e < 113) & (e > 101)) * ((((0x007FF000 + m) >> (125 - e)) + 1) >> 1) | (e > 143) * 0x7FFF; // sign : normalized : denormalized : saturate
+    // }
     void callback(const integration::PclTransfer::ConstPtr &msg)
     {
-        if (first_) {
-            depth_image_msg_.header = msg->depth_image.header;
-            depth_image_msg_.header.frame_id = "world";
-            depth_image_msg_.width = msg->depth_image.width;
-            depth_image_msg_.step = msg->depth_image.step * 2;
-            depth_image_msg_.encoding = msg->depth_image.encoding;
-            depth_image_msg_.is_bigendian = msg->depth_image.is_bigendian;
-            depth_image_msg_.height = msg->depth_image.height;
-            depth_image_msg_.width = msg->depth_image.width;
-            depth_image_msg_.data.resize(msg->depth_image.height * msg->depth_image.width * 4);
-            first_ = false;
-        }
-        for (size_t row = 0; row < msg->depth_image.height; row++) {
-            for (size_t col = 0; col < msg->depth_image.width; col++) {
-                ushort fs;
-                memcpy((uchar *)(&fs), &msg->depth_image.data[row * msg->depth_image.step + 2 * col], 2);
-                float d = half_to_float(fs);
-                d *= 10;
-                if (d == 0 || d > 100)
-                    d = std::nanf("");
-                memcpy((uchar *)(&depth_image_msg_.data[row * depth_image_msg_.step + 4 * col]), &d, 4);
-            }
-        }
-        depth_image_msg_.header = msg->header;
-        depth_image_msg_.header.frame_id = "world";
-        ros::Time now = ros::Time::now();
-        std_msgs::Float32 delay_msg;
-        delay_msg.data = now.toSec() - msg->header.stamp.toSec();
-        ROS_INFO("Compress Diff %f", now.toSec() - msg->header.stamp.toSec());
+        depth_image_msg_ = depth_image_decompressor_.decodeDepthImage(msg->depth_image);
+        // if (first_) {
+        //     depth_image_msg_.header = msg->depth_image.header;
+        //     depth_image_msg_.header.frame_id = "world";
+        //     depth_image_msg_.width = msg->depth_image.width;
+        //     depth_image_msg_.step = msg->depth_image.step * 2;
+        //     depth_image_msg_.encoding = msg->depth_image.encoding;
+        //     depth_image_msg_.is_bigendian = msg->depth_image.is_bigendian;
+        //     depth_image_msg_.height = msg->depth_image.height;
+        //     depth_image_msg_.width = msg->depth_image.width;
+        //     depth_image_msg_.data.resize(msg->depth_image.height * msg->depth_image.width * 4);
+        //     first_ = false;
+        // }
+        // for (size_t row = 0; row < msg->depth_image.height; row++) {
+        //     for (size_t col = 0; col < msg->depth_image.width; col++) {
+        //         ushort fs;
+        //         memcpy((uchar *)(&fs), &msg->depth_image.data[row * msg->depth_image.step + 2 * col], 2);
+        //         float d = half_to_float(fs);
+        //         d *= 10;
+        //         if (d == 0 || d > 100)
+        //             d = std::nanf("");
+        //         memcpy((uchar *)(&depth_image_msg_.data[row * depth_image_msg_.step + 4 * col]), &d, 4);
+        //     }
+        // }
+        // depth_image_msg_.header = msg->header;
+        // depth_image_msg_.header.frame_id = "world";
+        // ros::Time now = ros::Time::now();
+        // std_msgs::Float32 delay_msg;
+        // delay_msg.data = now.toSec() - msg->header.stamp.toSec();
+        // ROS_INFO("Compress Diff %f", now.toSec() - msg->header.stamp.toSec());
         // ROS_INFO("Depth Diff %f", now.toSec() - depth_image_msg_.header.stamp.toSec());
         // ROS_INFO("Image Diff %f", now.toSec() - msg->rgb_image.header.stamp.toSec());
         // delay_pub_.publish(delay_msg);
@@ -104,6 +105,7 @@ protected:
     sensor_msgs::Image depth_image_msg_;
     // sensor_msgs::CompressedImage image_msg_;
     sensor_msgs::CameraInfo camera_info_msg_;
+    compress_depth_image::DeCompressDepth depth_image_decompressor_;
     // sensor_msgs::PointCloud2 pcl_msg_;
     bool first_, got_camera_info_;
 };

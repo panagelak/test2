@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   integration
   image_transport
+  compress_depth_image
 )
 
 #find_package(PCL 1.7 REQUIRED)
@@ -41,3 +42,11 @@ add_dependencies(pcl_serializer ${catkin_EXPORTED_TARGETS})
 add_executable(pcl_deserializer nodes/pcl_deserializer.cpp)
 target_link_libraries(pcl_deserializer ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 add_dependencies(pcl_deserializer ${catkin_EXPORTED_TARGETS})
+
+add_executable(compress_depth_image nodes/compress_depth_image.cpp)
+target_link_libraries(compress_depth_image ${catkin_LIBRARIES})
+add_dependencies(compress_depth_image ${catkin_EXPORTED_TARGETS})
+
+add_executable(decompress_depth_image nodes/decompress_depth_image.cpp)
+target_link_libraries(decompress_depth_image ${catkin_LIBRARIES})
+add_dependencies(decompress_depth_image ${catkin_EXPORTED_TARGETS})

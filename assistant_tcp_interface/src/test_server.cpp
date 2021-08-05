@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 
   boost::asio::io_service io_service;
   // listen for new connection
-  tcp::acceptor acceptor_(io_service, tcp::endpoint(tcp::v4(), 1240));
+  tcp::acceptor acceptor_(io_service, tcp::endpoint(tcp::v4(), 1244));
   // socket creation
   tcp::socket socket_(io_service);
   // waiting for connection

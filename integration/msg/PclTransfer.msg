@@ -1,4 +1,4 @@
 Header header
-sensor_msgs/Image depth_image
+sensor_msgs/CompressedImage depth_image
 sensor_msgs/CompressedImage rgb_image
 # sensor_msgs/CameraInfo camera_info
