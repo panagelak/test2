@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /Image2
       Splitter Ratio: 0.5
     Tree Height: 265
   - Class: rviz/Selection
@@ -90,7 +91,7 @@ Visualization Manager:
       Value: false
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /camera/rgb/image_rect_color
+      Image Topic: /zed_image
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -102,7 +103,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /camera/depth_registered/image_raw
+      Image Topic: /zed_depth_image
       Max Value: 1
       Median window: 5
       Min Value: 0

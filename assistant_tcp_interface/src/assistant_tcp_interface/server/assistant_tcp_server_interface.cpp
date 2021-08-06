@@ -56,6 +56,7 @@ void AssistantTcpServerInterface::acceptServer() {
     throw e;
   }
 }
+
 void AssistantTcpServerInterface::start_accept() {
   try {
     acceptor_ptr_->accept(*socket_ptr_);
@@ -67,6 +68,7 @@ void AssistantTcpServerInterface::start_accept() {
     throw e;
   }
 }
+
 void AssistantTcpServerInterface::handle_accept(const boost::system::error_code &err) {
   ;
 }
