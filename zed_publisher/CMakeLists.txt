@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
 	message_filters
 	image_transport
 	compress_depth_image
+	compress_image
 )
 
 find_package(Boost REQUIRED COMPONENTS system program_options thread)
@@ -41,6 +42,7 @@ catkin_package(CATKIN_DEPENDS
 	message_filters
 	image_transport
 	compress_depth_image
+	compress_image
 )
 
 include_directories(${catkin_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS} ${ZED_INCLUDE_DIRS} include)

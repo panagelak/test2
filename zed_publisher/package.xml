@@ -30,6 +30,7 @@
 	<exec_depend>sensor_msgs</exec_depend>
 	<depend>image_transport</depend>
 	<depend>compress_depth_image</depend>
+	<depend>compress_image</depend>
 	
 	<!-- <depend>compress_depth_image_transport</depend> -->
 	

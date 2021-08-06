@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cmath>
 #include <compress_depth_image/compress_depth.h>
+#include <compress_image/compress_image.h>
 #include <geometry_msgs/Point.h>
 #include <iostream>
 #include <sensor_msgs/CameraInfo.h>
@@ -48,8 +49,10 @@ private:
   // ROS publishers
   // ros::Publisher PubSkeletons;
   ros::Publisher PubImage;
+  ros::Publisher PubCompressImage;
   ros::Publisher PubDepthImage;
   ros::Publisher PubDepthCompressImage;
   double frequency_;
   compress_depth_image::CompressDepth depth_image_compressor_;
+  compress_image::CompressImage image_compressor_;
 };

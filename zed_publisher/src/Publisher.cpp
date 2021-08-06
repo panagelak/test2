@@ -3,11 +3,12 @@
 Publisher::Publisher(ros::NodeHandle &nh) : nh_(nh), frequency_(30.) {
 
   // Load and apply the configuration of the publishers
-  std::string TopicImage = "zed_image", TopicDepthImage = "zed_depth_image",
-              TopicCompressDepthImage = "zed_depth_image/compressed";
+  std::string TopicImage = "zed_image", TopicCompressImage = "zed_image/compressed",
+              TopicDepthImage = "zed_depth_image", TopicCompressDepthImage = "zed_depth_image/compressed";
   // nh_.param<std::string>("TopicImage", TopicImage, "image");
   // nh_.param<std::string>("TopicDepthImage", TopicImage, "depth_image");
   PubImage = nh_.advertise<sensor_msgs::Image>(TopicImage, 1);
+  PubCompressImage = nh_.advertise<sensor_msgs::CompressedImage>(TopicCompressImage, 1);
   PubDepthImage = nh_.advertise<sensor_msgs::Image>(TopicDepthImage, 1);
   PubDepthCompressImage = nh_.advertise<sensor_msgs::CompressedImage>(TopicCompressDepthImage, 1);
 
@@ -70,7 +71,16 @@ bool Publisher::Publish() {
     PubImage.publish(ImgMsg);
     // ROS_INFO("Publishing Image takes : %f", ros::Time::now().toSec() - now_pub_img.toSec());
 
+    ros::Time now_compress_img = ros::Time::now();
+    sensor_msgs::CompressedImage compress_image_msg =
+        image_compressor_.encodeImage(*ImgMsg, "jpeg", 80, false, false, 0, 9);
+    ROS_INFO("Compressing Image takes : %f", ros::Time::now().toSec() - now_compress_img.toSec());
+    ROS_INFO("Original Image size is : %d", ImgMsg->data.size());
+    ROS_INFO("Compress Image size is : %d", compress_image_msg.data.size());
+    PubCompressImage.publish(compress_image_msg);
+    // DEPTH =================
     // Retrieve and publish depth image
+
     ros::Time now_retr_dimg = ros::Time::now();
     ZED.retrieveMeasure(depth_map, sl::MEASURE::DEPTH, sl::MEM::CPU);
     // ROS_INFO("Retreiving Depth Image takes : %f", ros::Time::now().toSec() - now_retr_dimg.toSec());
@@ -85,13 +95,13 @@ bool Publisher::Publish() {
     // compress and publish depth Image
     ros::Time now_compress_dimg = ros::Time::now();
     // sensor_msgs::CompressedImage compress_msg =
-        // depth_image_compressor_.encodeDepthImage(*DepthImgMsg, "png", 10., 100., 9);
-    sensor_msgs::CompressedImage compress_msg =
+    // depth_image_compressor_.encodeDepthImage(*DepthImgMsg, "png", 10., 100., 9);
+    sensor_msgs::CompressedImage compress_depth_image_msg =
         depth_image_compressor_.encodeDepthImage(*DepthImgMsg, "png", 5., 40., 1);
     ROS_INFO("Compressing Depth Image takes : %f", ros::Time::now().toSec() - now_compress_dimg.toSec());
-    ROS_INFO("Original size is : %d", DepthImgMsg->data.size());
-    ROS_INFO("Compress size is : %d", compress_msg.data.size());
-    PubDepthCompressImage.publish(compress_msg);
+    ROS_INFO("Original Depth Image size is : %d", DepthImgMsg->data.size());
+    ROS_INFO("Compress Depth Image size is : %d", compress_depth_image_msg.data.size());
+    PubDepthCompressImage.publish(compress_depth_image_msg);
     return true;
   }
   return false;
