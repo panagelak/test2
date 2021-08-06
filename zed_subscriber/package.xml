@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>zed_subscriber</name>
+  <version>0.0.0</version>
+  <description>The zed_subscriber package</description>
+
+  <maintainer email="lms@lms.mech.upatras.gr">LMS</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>pcl_ros</depend>  
+  <depend>pcl_conversions</depend>    
+  <depend>message_filters</depend>    
+  <!-- <depend>detectron2_ros</depend>  -->
+  <depend>tf2</depend>  
+  <depend>tf2_ros</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>zed_msgs</depend>
+  <depend>compress_depth_image</depend>
+  <depend>compress_image</depend>
+
+  <export>
+  </export>
+
+</package>

@@ -5,7 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /Image2
+        - /PointCloud21
       Splitter Ratio: 0.5
     Tree Height: 265
   - Class: rviz/Selection
@@ -91,7 +91,7 @@ Visualization Manager:
       Value: false
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /zed_image
+      Image Topic: /zed_image_out/image_rect_color
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -103,7 +103,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /zed_depth_image
+      Image Topic: /zed_depth_image_out/depth_registered
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -123,7 +123,7 @@ Visualization Manager:
       Channel Name: intensity
       Class: rviz/PointCloud2
       Color: 255; 255; 255
-      Color Transformer: Intensity
+      Color Transformer: RGB8
       Decay Time: 0
       Enabled: true
       Invert Rainbow: false
@@ -138,7 +138,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.009999999776482582
       Style: Flat Squares
-      Topic: /zed2/point_cloud
+      Topic: /zed_point_cloud_out
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -171,7 +171,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.6460156440734863
+      Distance: 7.196589469909668
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -186,10 +186,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.3353998064994812
+      Pitch: 0.9453994035720825
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.432223320007324
+      Yaw: 4.507226467132568
     Saved: ~
 Window Geometry:
   Displays:
