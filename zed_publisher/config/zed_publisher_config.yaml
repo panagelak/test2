@@ -1,0 +1,28 @@
+zed_publisher:
+  Frequency: 100 # The operating frequency in Hz. Tune depending on needs and resolution performance
+  # Zed Parameters
+  Mode: 2 # The depth detection mode: 1: Performance, 2: Quality, 3: Ultra
+  # 0: Left, 1: Right, 2: LeftGray, 3: RightGray, 4: LeftUnrectified, 5: RightUnrectified, 6: LeftUnrectifiedGray
+  # 7: RightUnrectifiedGray, 8: SideBySide, 9: LeftDepth, 10: Condidence, 11: LeftNormals, 12: RightDepth, 13: RightNormals
+  LensMode: 0
+  LensDepthMode: 9
+  LensFrame: "zed2_left_camera_frame" # The TF frame the image originates from. Change depending on the LensMode
+  Resolution: 3 # 0: 2K=2208*1242@15FPS, 1: FHD=1920*1080@30FPS, 2: HD=1280*720@60FPS, 3: VGA=672*376@100FPS
+  MinimumDepth: 0.4
+
+  # Publisher options
+  PubOnlyTransfer: true
+  Verbose: false
+
+  # Compression Image parameters
+  image_format: "jpeg"     # Compression format : jpeg or png
+  jpeg_quality: 80         # JPEG quality percentile
+  jpeg_progressive: false  # Enable compression to progressive JPEG
+  jpeg_optimize: false     # Enable JPEG compress optimization
+  jpeg_restart_interval: 0 # JPEG restart interval
+  image_png_level: 9       # PNG compression level
+  # Compression Depth Image parameters
+  depth_format: "png"      # Compression format : png or rvl
+  depth_max: 5.0           # Maximum depth value (meter)
+  depth_quantization: 40.  # Depth value at which the sensor accuracy is 1 m (Kinect: >75)
+  depth_png_level: 1       # PNG compression level

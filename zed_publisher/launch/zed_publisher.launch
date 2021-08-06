@@ -6,15 +6,21 @@
 	<arg name="broadcast_tf" default="false"/>
 
 	<!-- Show RViz -->
-	<node if="$(arg show_rviz)" name="zed_publisher_rviz" pkg="rviz" type="rviz" args="-d $(find zed_publisher)/config/sample.rviz"/>
+	<node if="$(arg show_rviz)" name="zed_publisher_rviz" pkg="rviz" type="rviz" args="-d $(find zed_publisher)/rviz/sample.rviz"/>
 
 	<!-- Load the configuration file -->
-	<rosparam command="load" file="$(find zed_publisher)/config/config.yaml"/>
+	<rosparam command="load" file="$(find zed_publisher)/config/zed_publisher_config.yaml"/>
 
 	<!-- Adjust the TF frame according to your configuration file and setup-->
 	<node if="$(arg broadcast_tf)" pkg="tf" type="static_transform_publisher" name="zed_broadcaster" args="0 0 0 0 0 0 world zed2_left_camera_frame 100"/>
 
 	<!-- Start the node -->
-	<node pkg="zed_publisher" type="zed_publisher" name="zed_publisher" output="screen"/>
+	<node pkg="zed_publisher" type="zed_publisher" name="zed_publisher" output="screen">
+	  <remap from="zed_image" to="/zed_image"/>
+	  <remap from="zed_image/compressed" to="/zed_image/compressed"/>
+	  <remap from="zed_depth_image" to="/zed_depth_image"/>
+	  <remap from="zed_depth_image/compressed" to="/zed_depth_image/compressed"/>
+	  <remap from="zed_transfer" to="/zed_transfer"/>
+	</node>
 
 </launch>
