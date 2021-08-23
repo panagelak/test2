@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 	<!-- Load the configuration file -->
-	<rosparam command="load" file="$(find zed_publisher)/config/zed_publisher_config.yaml"/>
+	<rosparam command="load" file="$(find zed_publisher)/cfg/zed_publisher_config.yaml"/>
 
 	<!-- Start the node -->
 	<node pkg="zed_publisher" type="zed_publisher" name="zed_publisher" output="screen" />

@@ -58,6 +58,8 @@ ZEDPublisher::ZEDPublisher(ros::NodeHandle &nh) : name_("zed_publisher"), nh_(nh
 
   // Create Timer Callback
   Timer = nh_priv.createWallTimer(ros::WallDuration(1.0 / double(frequency_)), &ZEDPublisher::Publish, this);
+  DepthImgMsg = boost::make_shared<sensor_msgs::Image>();
+  ImgMsg = boost::make_shared<sensor_msgs::Image>();
 }
 
 ZEDPublisher::~ZEDPublisher() {
