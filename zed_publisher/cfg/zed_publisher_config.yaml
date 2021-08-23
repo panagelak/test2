@@ -1,5 +1,5 @@
 zed_publisher:
-  Frequency: 15 # The operating frequency in Hz. Tune depending on needs and resolution performance
+  Frequency: 100 # The operating frequency in Hz. Tune depending on needs and resolution performance
   # Zed Parameters
   Mode: 2 # The depth detection mode: 1: Performance, 2: Quality, 3: Ultra
   # 0: Left, 1: Right, 2: LeftGray, 3: RightGray, 4: LeftUnrectified, 5: RightUnrectified, 6: LeftUnrectifiedGray
@@ -18,5 +18,3 @@ zed_publisher:
   ZedImageComp: "zed_image/compressed"
   ZedDepthImage: "zed_depth_image"
   ZedDepthImageComp: "zed_depth_image/compressed"
-  ZedTransfer: "zed_transfer"
-  WithService: true

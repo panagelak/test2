@@ -81,5 +81,4 @@ private:
   std::string ZedImage_, ZedImageComp_, ZedDepthImage_, ZedDepthImageComp_, ZedTransfer_;
   // image pointers
   sensor_msgs::ImagePtr ImgMsg, DepthImgMsg;
-  bool with_service_;
 };

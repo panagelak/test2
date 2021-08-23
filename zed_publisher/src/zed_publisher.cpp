@@ -24,7 +24,6 @@ ZEDPublisher::ZEDPublisher(ros::NodeHandle &nh) : name_("zed_publisher"), nh_(nh
   error += !rosparam_shortcuts::get(name_, nh_priv, "ZedDepthImage", ZedDepthImage_);
   error += !rosparam_shortcuts::get(name_, nh_priv, "ZedDepthImageComp", ZedDepthImageComp_);
   error += !rosparam_shortcuts::get(name_, nh_priv, "ZedTransfer", ZedTransfer_);
-  error += !rosparam_shortcuts::get(name_, nh_priv, "WithService", with_service_);
 
   rosparam_shortcuts::shutdownIfError(name_, error);
 
@@ -35,7 +34,6 @@ ZEDPublisher::ZEDPublisher(ros::NodeHandle &nh) : name_("zed_publisher"), nh_(nh
     PubDepthImage = nh_.advertise<sensor_msgs::Image>(ZedDepthImage_, 1);
     PubDepthCompressImage = nh_.advertise<sensor_msgs::CompressedImage>(ZedDepthImageComp_, 1);
   }
-  // PubTransferCompressCombined = nh_.advertise<zed_msgs::ZedTransfer>(ZedTransfer_, 1);
   // Set the parameters of the camera
   sl::InitParameters ZEDParam;
   ZEDParam.camera_resolution = static_cast<sl::RESOLUTION>(resolution_);
@@ -74,9 +72,7 @@ ZEDPublisher::~ZEDPublisher() {
 void ZEDPublisher::retrieveAndCompressImage() {
 
   // === Retrieving
-  // ros::Time now_retr_img = ros::Time::now();
   ZED.retrieveImage(Image, Lens, sl::MEM::CPU);
-  // ros::Time end_retr_img = ros::Time::now();
 
   // === Converting to ros message
   ToROSImage(ImgMsg, &Image, LensFrame_, ros::Time::now());
@@ -86,9 +82,6 @@ void ZEDPublisher::retrieveAndCompressImage() {
   TransferService_.request.zed_transfer.rgb_image = image_compressor_.encodeImage(
       *ImgMsg, config_.img_format, config_.img_jpeg_quality, config_.img_jpeg_progressive, config_.img_jpeg_optimize,
       config_.img_jpeg_restart_interval, config_.img_png_level);
-  // TransferMsg_.rgb_image = image_compressor_.encodeImage(*ImgMsg, config_.img_format, config_.img_jpeg_quality,
-  //                                                       config_.img_jpeg_progressive, config_.img_jpeg_optimize,
-  //                                                       config_.img_jpeg_restart_interval, config_.img_png_level);
   if (verbose_img_)
     ROS_INFO("Image -> Compr Time : %f Size : %d", ros::Time::now().toSec() - now_compress_img.toSec(),
              TransferMsg_.rgb_image.data.size());
@@ -96,9 +89,7 @@ void ZEDPublisher::retrieveAndCompressImage() {
 void ZEDPublisher::retrieveAndCompressDepthImage() {
 
   // === Retrieving
-  // ros::Time now_retr_dimg = ros::Time::now();
   ZED.retrieveMeasure(depth_map, sl::MEASURE::DEPTH, sl::MEM::CPU);
-  // ros::Time end_retr_dimg = ros::Time::now();
 
   // === Converting to ros message
   ToROSImage(DepthImgMsg, &depth_map, LensFrame_, ros::Time::now());
@@ -107,8 +98,6 @@ void ZEDPublisher::retrieveAndCompressDepthImage() {
   ros::Time now_compress_dimg = ros::Time::now();
   TransferService_.request.zed_transfer.depth_image = depth_image_compressor_.encodeDepthImage(
       *DepthImgMsg, config_.depth_format, config_.depth_max, config_.depth_quantization, config_.depth_png_level);
-  // TransferMsg_.depth_image = depth_image_compressor_.encodeDepthImage(
-  // *DepthImgMsg, config_.depth_format, config_.depth_max, config_.depth_quantization, config_.depth_png_level);
   if (verbose_depth_)
     ROS_INFO("Depth -> Compr Time : %f Size : %d", ros::Time::now().toSec() - now_compress_dimg.toSec(),
              TransferService_.request.zed_transfer.depth_image.data.size());
@@ -130,10 +119,7 @@ void ZEDPublisher::Publish(const ros::WallTimerEvent &event) {
       PubDepthCompressImage.publish(TransferMsg_.depth_image);
     }
 
-    // Publish Transfer Topic
-    // TransferMsg_.header.frame_id = "";
-    // TransferMsg_.header.stamp = ros::Time::now();
-    // PubTransferCompressCombined.publish(TransferMsg_);
+    // Call the Service
     ros::Time nows = ros::Time::now();
     TransferService_.request.zed_transfer.header.frame_id = "";
     TransferService_.request.zed_transfer.header.stamp = ros::Time::now();
@@ -141,7 +127,8 @@ void ZEDPublisher::Publish(const ros::WallTimerEvent &event) {
       ROS_ERROR("Problem Calling the service");
     }
     ros::Time ends = ros::Time::now();
-    ROS_INFO("Calling service took %f", ends.toSec() - nows.toSec());
+    if (verbose_depth_)
+      ROS_INFO("Calling service took %f", ends.toSec() - nows.toSec());
   }
 }
 
