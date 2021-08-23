@@ -57,7 +57,7 @@ ZEDPublisher::ZEDPublisher(ros::NodeHandle &nh) : name_("zed_publisher"), nh_(nh
   server_.setCallback(f_);
 
   // client
-  client_ = nh_.serviceClient<zed_msgs::ZedTransferService>("zed_transfer_service");
+  client_ = nh_.serviceClient<zed_msgs::ZedTransferService>(ZedTransfer_);
 
   // Create Timer Callback
   Timer = nh_priv.createWallTimer(ros::WallDuration(1. / double(frequency_)), &ZEDPublisher::Publish, this);
