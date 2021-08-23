@@ -98,7 +98,7 @@ void ZEDPublisher::retrieveAndCompressDepthImage() {
   ros::Time now_compress_dimg = ros::Time::now();
   TransferService_.request.zed_transfer.depth_image = depth_image_compressor_.encodeDepthImage(
       *DepthImgMsg, config_.depth_format, config_.depth_max, config_.depth_quantization, config_.depth_png_level);
-  if (verbose_depth_ && count_ % 50)
+  if (verbose_depth_ && count_ % 500)
     ROS_INFO("Depth -> Compr Time : %f Size : %d", ros::Time::now().toSec() - now_compress_dimg.toSec(),
              TransferService_.request.zed_transfer.depth_image.data.size());
 }
@@ -128,7 +128,7 @@ void ZEDPublisher::Publish(const ros::WallTimerEvent &event) {
     }
     ros::Time ends = ros::Time::now();
     count_++;
-    if (verbose_depth_ && count_ % 50) {
+    if (verbose_depth_ && count_ % 500) {
       ROS_INFO("Calling service took %f", ends.toSec() - nows.toSec());
     }
   }
