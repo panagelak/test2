@@ -68,7 +68,7 @@ private:
   std::string LensFrame_;
   // publisher option
   bool PubOnlyTransfer_;
-  bool verbose_;
+  bool verbose_img_, verbose_depth_;
   // timer callback
   ros::WallTimer Timer;
   // Initialize dynamic reconfigure
