@@ -1,0 +1,3 @@
+zed_msgs/ZedTransfer zed_transfer
+---
+bool success

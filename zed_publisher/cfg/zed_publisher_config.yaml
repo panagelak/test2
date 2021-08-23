@@ -19,3 +19,4 @@ zed_publisher:
   ZedDepthImage: "zed_depth_image"
   ZedDepthImageComp: "zed_depth_image/compressed"
   ZedTransfer: "zed_transfer"
+  WithService: true

@@ -17,6 +17,7 @@
 #include <sl/Camera.hpp>
 #include <std_msgs/Header.h>
 #include <zed_msgs/ZedTransfer.h>
+#include <zed_msgs/ZedTransferService.h>
 #include <zed_publisher/ZEDPublisherConfig.h>
 
 // Boost headers
@@ -54,9 +55,9 @@ private:
   ros::Publisher PubDepthImage;
   ros::Publisher PubDepthCompressImage;
   ros::Publisher PubTransferCompressCombined;
-
+  ros::ServiceClient client_;
   zed_msgs::ZedTransfer TransferMsg_;
-
+  zed_msgs::ZedTransferService TransferService_;
   compress_depth_image::CompressDepth depth_image_compressor_;
   compress_image::CompressImage image_compressor_;
   double frequency_;
@@ -80,4 +81,5 @@ private:
   std::string ZedImage_, ZedImageComp_, ZedDepthImage_, ZedDepthImageComp_, ZedTransfer_;
   // image pointers
   sensor_msgs::ImagePtr ImgMsg, DepthImgMsg;
+  bool with_service_;
 };

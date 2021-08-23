@@ -20,9 +20,9 @@ add_message_files(
 )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   DIRECTORY srv
-# )
+add_service_files(
+  DIRECTORY srv
+)
 
 # Generate actions in the 'action' folder
 #add_action_files(
