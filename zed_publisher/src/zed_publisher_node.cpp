@@ -7,17 +7,11 @@ int main(int argc, char **argv) {
   spinner.start();
   ros::NodeHandle nh("");
 
-  // Set the ROS logging level (for better debugging)
-  // if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info)) {
-  //     ros::console::notifyLoggerLevelsChanged();
-  // }
-
   ROS_INFO("ZED Publisher");
-
   // Create the zed publisher object
   ZEDPublisher ZEDPublisher(nh);
-  ZEDPublisher.run();
 
+  ros::waitForShutdown();
   ROS_INFO("Exiting.");
   return 0;
 }

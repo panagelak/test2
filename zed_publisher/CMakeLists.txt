@@ -22,7 +22,10 @@ find_package(catkin REQUIRED COMPONENTS
 	compress_depth_image
 	compress_image
 	rosparam_shortcuts
+	dynamic_reconfigure
 )
+
+generate_dynamic_reconfigure_options(cfg/ZEDPublisher.cfg)
 
 catkin_package(CATKIN_DEPENDS
 	roscpp
@@ -31,12 +34,13 @@ catkin_package(CATKIN_DEPENDS
 	compress_depth_image
 	compress_image
 	rosparam_shortcuts
+	dynamic_reconfigure
 )
 
 include_directories(${catkin_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS} ${ZED_INCLUDE_DIRS} include)
 set(SOURCES src/${PROJECT_NAME}.cpp src/zed_publisher_node.cpp)
 add_executable(${PROJECT_NAME} ${SOURCES})
-add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 target_compile_options(${PROJECT_NAME} PRIVATE)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${CUDA_CUDA_LIBRARY} ${CUDA_LIBRARY} ${ZED_LIBRARIES} ${CUDA_CUDART_LIBRARY} ${CUDA_DEP_LIBRARIES_ZED})
 install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})

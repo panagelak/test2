@@ -7,6 +7,7 @@
 #include <cmath>
 #include <compress_depth_image/compress_depth.h>
 #include <compress_image/compress_image.h>
+#include <dynamic_reconfigure/server.h>
 #include <iostream>
 #include <rosparam_shortcuts/rosparam_shortcuts.h>
 #include <sensor_msgs/CameraInfo.h>
@@ -16,6 +17,11 @@
 #include <sl/Camera.hpp>
 #include <std_msgs/Header.h>
 #include <zed_msgs/ZedTransfer.h>
+#include <zed_publisher/ZEDPublisherConfig.h>
+
+// Boost headers
+// #include <boost/shared_ptr.hpp>
+#include <boost/thread/thread.hpp>
 
 class ZEDPublisher {
 public:
@@ -23,24 +29,20 @@ public:
   virtual ~ZEDPublisher();
 
   void Shutdown();
-  bool Publish();
-  void run();
+  void Publish(const ros::WallTimerEvent &event);
 
 private:
-  std::string name_; // Name of this class (for parameter loading)
+  void Reconfigure(zed_publisher::ZEDPublisherConfig &config, uint32_t level);
   void ToROSImage(sensor_msgs::ImagePtr MsgPtr, sl::Mat *Image, std::string Frame, ros::Time t);
+  void retrieveAndCompressImage();
+  void retrieveAndCompressDepthImage();
+
+  std::string name_; // Name of this class (for parameter loading)
   ros::NodeHandle nh_;
   // ZED SDK Objects
   sl::Camera ZED;
-  // sl::Objects Bodies;
   sl::Mat Image;
   sl::Mat depth_map;
-  // Floor Plane Detection
-  // bool		  NeedsFloor = true;
-  // sl::Plane	  Floor;
-  // sl::Transform FloorTransform;
-  // Detection Parameters
-  // sl::ObjectDetectionRuntimeParameters ZedParam;
   // Lens Selection
   sl::VIEW Lens;
   // sl::MEASURE LensDepth;
@@ -67,16 +69,15 @@ private:
   // publisher option
   bool PubOnlyTransfer_;
   bool verbose_;
-  // compression image parameters
-  std::string image_format_;
-  int jpeg_quality_;
-  bool jpeg_progressive_;
-  bool jpeg_optimize_;
-  int jpeg_restart_interval_;
-  int image_png_level_;
-  // compression depth image parameters
-  std::string depth_format_;
-  double depth_max_;
-  double depth_quantization_;
-  int depth_png_level_;
+  // timer callback
+  ros::WallTimer Timer;
+  // Initialize dynamic reconfigure
+  dynamic_reconfigure::Server<zed_publisher::ZEDPublisherConfig> server_;
+  dynamic_reconfigure::Server<zed_publisher::ZEDPublisherConfig>::CallbackType f_;
+  // compress rgb and depth image config
+  zed_publisher::ZEDPublisherConfig config_;
+  // Topic names
+  std::string ZedImage_, ZedImageComp_, ZedDepthImage_, ZedDepthImageComp_, ZedTransfer_;
+  // image pointers
+  sensor_msgs::ImagePtr ImgMsg, DepthImgMsg;
 };

@@ -19,6 +19,7 @@
 	<depend>compress_depth_image</depend>
 	<depend>compress_image</depend>
 	<depend>rosparam_shortcuts</depend>
+	<depend>dynamic_reconfigure</depend>
 
 	<export>
 	</export>

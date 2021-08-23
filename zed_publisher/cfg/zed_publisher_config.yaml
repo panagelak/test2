@@ -1,0 +1,20 @@
+zed_publisher:
+  Frequency: 15 # The operating frequency in Hz. Tune depending on needs and resolution performance
+  # Zed Parameters
+  Mode: 2 # The depth detection mode: 1: Performance, 2: Quality, 3: Ultra
+  # 0: Left, 1: Right, 2: LeftGray, 3: RightGray, 4: LeftUnrectified, 5: RightUnrectified, 6: LeftUnrectifiedGray
+  # 7: RightUnrectifiedGray, 8: SideBySide, 9: LeftDepth, 10: Condidence, 11: LeftNormals, 12: RightDepth, 13: RightNormals
+  LensMode: 0
+  LensDepthMode: 9
+  LensFrame: "zed2_left_camera_frame" # The TF frame the image originates from. Change depending on the LensMode
+  Resolution: 3 # 0: 2K=2208*1242@15FPS, 1: FHD=1920*1080@30FPS, 2: HD=1280*720@60FPS, 3: VGA=672*376@100FPS
+  MinimumDepth: 0.25
+  # Publisher options
+  PubOnlyTransfer: true
+  Verbose: true
+  # Topics
+  ZedImage: "zed_image"
+  ZedImageComp: "zed_image/compressed"
+  ZedDepthImage: "zed_depth_image"
+  ZedDepthImageComp: "zed_depth_image/compressed"
+  ZedTransfer: "zed_transfer"

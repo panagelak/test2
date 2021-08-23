@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-  <node name="assistant_client_node" pkg="assistant_tcp_interface" type="assistant_client_node" output="screen">
-    <rosparam file="$(find assistant_tcp_interface)/config/net_config.yaml"/>
-  </node>
-</launch>
