@@ -2,8 +2,10 @@ cmake_minimum_required(VERSION 2.8.3)
 project(zed_subscriber)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++14)
+add_compile_options(-std=c++11)
+
 find_package(catkin REQUIRED COMPONENTS
+  cmake_modules
   roscpp
   sensor_msgs 
   geometry_msgs
@@ -16,9 +18,10 @@ find_package(catkin REQUIRED COMPONENTS
   zed_msgs
   compress_depth_image
   compress_image
+  depth_image_to_pc2
+  image_geometry
 )
 
-#find_package(PCL 1.7 REQUIRED)
 find_package(PCL REQUIRED)
 
 catkin_package(

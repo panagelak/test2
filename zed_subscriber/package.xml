@@ -23,6 +23,8 @@
   <depend>zed_msgs</depend>
   <depend>compress_depth_image</depend>
   <depend>compress_image</depend>
+  <depend>depth_image_to_pc2</depend>
+  <depend>image_geometry</depend>
 
   <export>
   </export>

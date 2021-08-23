@@ -2,6 +2,7 @@
 #include <cmath>
 #include <compress_depth_image/decompressed_depth.h>
 #include <compress_image/decompress_image.h>
+#include <depth_image_to_pc2/point_cloud_xyz.h>
 #include <iostream>
 #include <ros/ros.h>
 #include <sensor_msgs/CameraInfo.h>
@@ -11,11 +12,10 @@
 #include <vector>
 #include <zed_msgs/ZedTransfer.h>
 #include <zed_msgs/ZedTransferService.h>
-
 // // pcl
 // #include <pcl/point_cloud.h>
 // #include <pcl_conversions/pcl_conversions.h>
-// #include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/PointCloud2.h>
 
 using namespace std::chrono;
 
@@ -27,6 +27,7 @@ public:
     im_pub_ = nh_.advertise<sensor_msgs::Image>("image_out", 0, false);
     depth_pub_ = nh_.advertise<sensor_msgs::Image>("depth_out", 0, false);
     camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("camera_info_out", 0, false);
+    pcl_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("pointcloud_out", 0, false);
     double frequency_ = 15.;
     Timer = nh_.createWallTimer(ros::WallDuration(1. / double(frequency_)), &ZedSubscriber::callback, this);
     last_ = ros::Time::now();
@@ -35,11 +36,12 @@ public:
     // ros::Duration(0.0)); camera_info_msg_ = *msg;
   }
   bool getTransferCB(zed_msgs::ZedTransferService::Request &req, zed_msgs::ZedTransferService::Response &res) {
+    transfer_header_ = req.zed_transfer.header;
     comp_depth_image_msg_ = req.zed_transfer.depth_image;
     comp_image_msg_ = req.zed_transfer.rgb_image;
     res.success = true;
     got_msg_ = true;
-    ROS_INFO("Service delay is : %f", ros::Time::now().toSec() - last_.toSec());
+    // ROS_INFO("Service delay is : %f", ros::Time::now().toSec() - last_.toSec());
     last_ = ros::Time::now();
     return res.success;
   }
@@ -93,11 +95,16 @@ public:
     depth_image_msg_.header.stamp = ros::Time::now();
     camera_info_msg_.header.stamp = ros::Time::now();
     camera_info_msg_.header.stamp = depth_image_msg_.header.stamp;
+    sensor_msgs::ImageConstPtr depth_ptr_(new sensor_msgs::Image(depth_image_msg_));
+    sensor_msgs::CameraInfoConstPtr cam_info_ptr_(new sensor_msgs::CameraInfo(camera_info_msg_));
+
+    pcl_xyz_msg_ = pcl_xyz_proc_.getPointCloudXyz(depth_ptr_, cam_info_ptr_);
     im_pub_.publish(image_msg_);
     depth_pub_.publish(depth_image_msg_);
 
     // camera_info_msg_.header.stamp = depth_image_msg_.header.stamp;
     camera_info_pub_.publish(camera_info_msg_);
+    pcl_pub_.publish(pcl_xyz_msg_);
   }
 
 protected:
@@ -105,16 +112,21 @@ protected:
   ros::Publisher im_pub_;
   ros::Publisher camera_info_pub_;
   ros::Publisher depth_pub_;
+  ros::Publisher pcl_pub_;
   // ros::Subscriber transfer_sub_;
   ros::ServiceServer server_;
   ros::WallTimer Timer;
   sensor_msgs::Image depth_image_msg_;
   sensor_msgs::Image image_msg_;
+  sensor_msgs::PointCloud2 pcl_xyz_msg_;
   sensor_msgs::CompressedImage comp_depth_image_msg_;
   sensor_msgs::CompressedImage comp_image_msg_;
+  std_msgs::Header transfer_header_;
   sensor_msgs::CameraInfo camera_info_msg_;
   compress_depth_image::DeCompressDepth depth_image_decompressor_;
   decompress_image::DeCompressImage image_decompressor_;
+  depth_image_to_pc2::PointCloudXyz pcl_xyz_proc_;
+
   bool first_, got_camera_info_;
   bool got_msg_;
   ros::Time last_;

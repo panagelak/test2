@@ -12,7 +12,7 @@ zed_publisher:
   # Publisher options
   PubOnlyTransfer: true
   VerboseImg: false
-  VerboseDepth: true
+  VerboseDepth: false
   # Topics
   ZedImage: "zed_image"
   ZedImageComp: "zed_image/compressed"

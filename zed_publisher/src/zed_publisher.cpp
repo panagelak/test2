@@ -84,7 +84,7 @@ void ZEDPublisher::retrieveAndCompressImage() {
       config_.img_jpeg_restart_interval, config_.img_png_level);
   if (verbose_img_)
     ROS_INFO("Image -> Compr Time : %f Size : %d", ros::Time::now().toSec() - now_compress_img.toSec(),
-             TransferMsg_.rgb_image.data.size());
+             TransferService_.request.zed_transfer.rgb_image.data.size());
 }
 void ZEDPublisher::retrieveAndCompressDepthImage() {
 
@@ -115,21 +115,18 @@ void ZEDPublisher::Publish(const ros::WallTimerEvent &event) {
     if (!PubOnlyTransfer_) {
       PubImage.publish(ImgMsg);
       PubDepthImage.publish(DepthImgMsg);
-      PubCompressImage.publish(TransferMsg_.rgb_image);
-      PubDepthCompressImage.publish(TransferMsg_.depth_image);
+      PubCompressImage.publish(TransferService_.request.zed_transfer.rgb_image);
+      PubDepthCompressImage.publish(TransferService_.request.zed_transfer.depth_image);
     }
 
     // Call the Service
     ros::Time nows = ros::Time::now();
     TransferService_.request.zed_transfer.header.frame_id = "";
     TransferService_.request.zed_transfer.header.stamp = ros::Time::now();
-    if (!client_.call(TransferService_)) {
-      ROS_ERROR("Problem Calling the service");
-    }
-    ros::Time ends = ros::Time::now();
-    if (verbose_depth_) {
-      ROS_INFO("Calling service took %f", ends.toSec() - nows.toSec());
-    }
+    if (!client_.call(TransferService_))
+      ROS_ERROR("Service not available");
+    if (verbose_depth_)
+      ROS_INFO("Calling service took %f", ros::Time::now().toSec() - nows.toSec());
   }
 }
 
