@@ -29,6 +29,7 @@ public:
     camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("camera_info_out", 0, false);
     double frequency_ = 15.;
     Timer = nh_.createWallTimer(ros::WallDuration(1. / double(frequency_)), &ZedSubscriber::callback, this);
+    last_ = ros::Time::now();
     // wait for first camera_info msg
     // auto msg = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("/zed2/zed_node/depth/camera_info",
     // ros::Duration(0.0)); camera_info_msg_ = *msg;
@@ -38,6 +39,8 @@ public:
     comp_image_msg_ = req.zed_transfer.rgb_image;
     res.success = true;
     got_msg_ = true;
+    ROS_INFO("Service delay is : %f", ros::Time::now().toSec() - last_.toSec());
+    last_ = ros::Time::now();
     return res.success;
   }
   // void callback(const zed_msgs::ZedTransfer::ConstPtr &msg) {
@@ -114,6 +117,7 @@ protected:
   decompress_image::DeCompressImage image_decompressor_;
   bool first_, got_camera_info_;
   bool got_msg_;
+  ros::Time last_;
 };
 
 int main(int argc, char **argv) {

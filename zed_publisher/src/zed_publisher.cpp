@@ -111,7 +111,7 @@ void ZEDPublisher::retrieveAndCompressDepthImage() {
   // *DepthImgMsg, config_.depth_format, config_.depth_max, config_.depth_quantization, config_.depth_png_level);
   if (verbose_depth_)
     ROS_INFO("Depth -> Compr Time : %f Size : %d", ros::Time::now().toSec() - now_compress_dimg.toSec(),
-             TransferMsg_.depth_image.data.size());
+             TransferService_.request.zed_transfer.depth_image.data.size());
 }
 
 void ZEDPublisher::Publish(const ros::WallTimerEvent &event) {
