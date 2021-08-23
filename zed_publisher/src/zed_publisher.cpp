@@ -70,10 +70,9 @@ ZEDPublisher::~ZEDPublisher() {
 void ZEDPublisher::retrieveAndCompressImage() {
 
   // === Retrieving
-  ros::Time now_retr_img = ros::Time::now();
+  // ros::Time now_retr_img = ros::Time::now();
   ZED.retrieveImage(Image, Lens, sl::MEM::CPU);
-  ros::Time end_retr_img = ros::Time::now();
-  // ROS_INFO("Retreiving Image takes : %f", ros::Time::now().toSec() - now_retr_img.toSec());
+  // ros::Time end_retr_img = ros::Time::now();
 
   // === Converting to ros message
   ToROSImage(ImgMsg, &Image, LensFrame_, ros::Time::now());
@@ -84,15 +83,15 @@ void ZEDPublisher::retrieveAndCompressImage() {
                                                          config_.img_jpeg_progressive, config_.img_jpeg_optimize,
                                                          config_.img_jpeg_restart_interval, config_.img_png_level);
   if (verbose_img_)
-    ROS_INFO("Image -> Retr Time : %f Compr Time : %f Size : %d", now_retr_img.toSec() - end_retr_img.toSec(),
-             ros::Time::now().toSec() - now_compress_img.toSec(), TransferMsg_.rgb_image.data.size());
+    ROS_INFO("Image -> Compr Time : %f Size : %d", ros::Time::now().toSec() - now_compress_img.toSec(),
+             TransferMsg_.rgb_image.data.size());
 }
 void ZEDPublisher::retrieveAndCompressDepthImage() {
 
   // === Retrieving
-  ros::Time now_retr_dimg = ros::Time::now();
+  // ros::Time now_retr_dimg = ros::Time::now();
   ZED.retrieveMeasure(depth_map, sl::MEASURE::DEPTH, sl::MEM::CPU);
-  ros::Time end_retr_dimg = ros::Time::now();
+  // ros::Time end_retr_dimg = ros::Time::now();
 
   // === Converting to ros message
   ToROSImage(DepthImgMsg, &depth_map, LensFrame_, ros::Time::now());
@@ -102,8 +101,8 @@ void ZEDPublisher::retrieveAndCompressDepthImage() {
   TransferMsg_.depth_image = depth_image_compressor_.encodeDepthImage(
       *DepthImgMsg, config_.depth_format, config_.depth_max, config_.depth_quantization, config_.depth_png_level);
   if (verbose_depth_)
-    ROS_INFO("Depth -> Retr Time : %f Compr Time : %f Size : %d", now_retr_dimg.toSec() - end_retr_dimg.toSec(),
-             ros::Time::now().toSec() - now_compress_dimg.toSec(), TransferMsg_.depth_image.data.size());
+    ROS_INFO("Depth -> Compr Time : %f Size : %d", ros::Time::now().toSec() - now_compress_dimg.toSec(),
+             TransferMsg_.depth_image.data.size());
 }
 
 void ZEDPublisher::Publish(const ros::WallTimerEvent &event) {

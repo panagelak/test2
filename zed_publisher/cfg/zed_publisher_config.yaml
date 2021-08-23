@@ -11,7 +11,7 @@ zed_publisher:
   MinimumDepth: 0.25
   # Publisher options
   PubOnlyTransfer: true
-  VerboseImg: true
+  VerboseImg: false
   VerboseDepth: true
   # Topics
   ZedImage: "zed_image"
