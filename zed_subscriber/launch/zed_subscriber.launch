@@ -3,13 +3,18 @@
   <arg name="show_rviz" default="true"/>
   <arg name="broadcast_tf" default="true"/>
 
+	<!-- Load the configuration file -->
+	<rosparam command="load" file="$(find zed_subscriber)/cfg/zed_subscriber_config.yaml"/>
+
+
   <node name="zed_subscriber" pkg="zed_subscriber" type="zed_subscriber"  output = "screen">
     <!-- <remap from="input_pointcloud" to="/zed2/zed_node/point_cloud/cloud_registered"/> -->
-    <remap from="input_zed_transfer" to="/zed_transfer"/>
+    <remap from="input_zed_transfer" to="/zed_transfer_service"/>
     <remap from="image_out" to="/zed_image_out/image_rect_color"/>
     <remap from="depth_out" to="/zed_depth_image_out/depth_registered"/>
     <remap from="pointcloud_out" to="/zed_point_cloud_out"/>
     <remap from="camera_info_out" to="/zed_depth_image_out/camera_info"/>
+    <remap from="htp_input" to="/htp_input"/>
   </node>
 
   <!-- <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" />
