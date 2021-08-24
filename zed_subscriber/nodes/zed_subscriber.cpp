@@ -57,19 +57,19 @@ bool ZedSubscriber::getTransferCB(zed_msgs::ZedTransferService::Request &req,
   res.success = true;
   got_msg_ = true;
   if (verbose_)
-    ROS_INFO("Service delay is : %f", ros::Time::now().toSec() - last_.toSec());
+    ROS_INFO("Service freq is : %f", 1. / (ros::Time::now().toSec() - last_.toSec()));
   last_ = ros::Time::now();
   return res.success;
 }
 void ZedSubscriber::callback(const ros::WallTimerEvent &event) {
   if (!got_msg_)
     return;
-  if (verbose_) {
-    ros::Time now = ros::Time::now();
-    ROS_INFO("Network Delay is %f", now.toSec() - transfer_header_.stamp.toSec());
-    ROS_INFO("Image Delay is %f", now.toSec() - comp_image_msg_.header.stamp.toSec());
-    ROS_INFO("Depth Image Delay is %f", now.toSec() - comp_depth_image_msg_.header.stamp.toSec());
-  }
+  // if (verbose_) {
+  //  ros::Time now = ros::Time::now();
+  //  ROS_INFO("Network Delay is %f", now.toSec() - transfer_header_.stamp.toSec());
+  //  ROS_INFO("Image Delay is %f", now.toSec() - comp_image_msg_.header.stamp.toSec());
+  //  ROS_INFO("Depth Image Delay is %f", now.toSec() - comp_depth_image_msg_.header.stamp.toSec());
+  //}
   depth_image_msg_ = depth_image_decompressor_.decodeDepthImage(comp_depth_image_msg_);
   image_msg_ = image_decompressor_.decodeImage(comp_image_msg_, "unchanged");
   // ROS_INFO("Decompress Delay is %f", ros::Time::now().toSec() - now.toSec());
