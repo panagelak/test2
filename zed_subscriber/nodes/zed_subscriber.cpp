@@ -56,7 +56,8 @@ bool ZedSubscriber::getTransferCB(zed_msgs::ZedTransferService::Request &req,
   comp_image_msg_ = req.zed_transfer.rgb_image;
   res.success = true;
   got_msg_ = true;
-  // ROS_INFO("Service delay is : %f", ros::Time::now().toSec() - last_.toSec());
+  if (verbose_)
+    ROS_INFO("Service delay is : %f", ros::Time::now().toSec() - last_.toSec());
   last_ = ros::Time::now();
   return res.success;
 }
