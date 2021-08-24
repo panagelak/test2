@@ -55,8 +55,6 @@ private:
   ros::Publisher PubDepthImage;
   ros::Publisher PubDepthCompressImage;
   ros::Publisher PubTransferCompressCombined;
-  // ros::ServiceClient client_;
-  // zed_msgs::ZedTransferService TransferService_;
   zed_msgs::ZedTransfer TransferMsg_;
   compress_depth_image::CompressDepth depth_image_compressor_;
   compress_image::CompressImage image_compressor_;

@@ -56,10 +56,6 @@ ZEDPublisher::ZEDPublisher(ros::NodeHandle &nh) : name_("zed_publisher"), nh_(nh
   // Enable the dynamic reconfigure
   f_ = boost::bind(&ZEDPublisher::Reconfigure, this, _1, _2);
   server_.setCallback(f_);
-
-  // client
-  // client_ = nh_.serviceClient<zed_msgs::ZedTransferService>(ZedTransfer_);
-
   // Create Timer Callback
   Timer = nh_priv.createWallTimer(ros::WallDuration(1. / double(frequency_)), &ZEDPublisher::Publish, this);
   DepthImgMsg = boost::make_shared<sensor_msgs::Image>();
@@ -121,15 +117,11 @@ void ZEDPublisher::Publish(const ros::WallTimerEvent &event) {
       PubDepthCompressImage.publish(TransferMsg_.depth_image);
     }
 
-    // Call the Service
+    // Publish the Message
     ros::Time nows = ros::Time::now();
     TransferMsg_.header.frame_id = "";
     TransferMsg_.header.stamp = ros::Time::now();
     PubTransferCompressCombined.publish(TransferMsg_);
-    // if (!client_.call(TransferService_))
-    //  ROS_ERROR("Service not available");
-    // if (verbose_depth_)
-    //  ROS_INFO("Calling service took %f", ros::Time::now().toSec() - nows.toSec());
   }
 }
 

@@ -40,7 +40,6 @@ protected:
   ros::Publisher pcl_pub_;
   ros::Publisher htp_input_pub_;
   ros::Subscriber sub_;
-  // ros::ServiceServer server_;
   ros::WallTimer Timer;
 
   sensor_msgs::Image depth_image_msg_;
