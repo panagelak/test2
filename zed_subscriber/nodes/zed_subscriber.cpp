@@ -9,7 +9,8 @@ ZedSubscriber::ZedSubscriber() : name_("zed_subscriber"), nh_(""), got_msg_(fals
   error += !rosparam_shortcuts::get(name_, nh_priv, "Verbose", verbose_);
   rosparam_shortcuts::shutdownIfError(name_, error);
 
-  server_ = nh_.advertiseService("input_zed_transfer", &ZedSubscriber::getTransferCB, this);
+  sub_ = nh_.subscribe("input_zed_transfer",100, &ZedSubscriber::getTransferCB, this);
+  // server_ = nh_.advertiseService("input_zed_transfer", &ZedSubscriber::getTransferCB, this);
   im_pub_ = nh_.advertise<sensor_msgs::Image>("image_out", 0, false);
   depth_pub_ = nh_.advertise<sensor_msgs::Image>("depth_out", 0, false);
   camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("camera_info_out", 0, false);
@@ -49,17 +50,16 @@ ZedSubscriber::ZedSubscriber() : name_("zed_subscriber"), nh_(""), got_msg_(fals
   camera_info_msg_.roi.do_rectify = false;
 }
 
-bool ZedSubscriber::getTransferCB(zed_msgs::ZedTransferService::Request &req,
-                                  zed_msgs::ZedTransferService::Response &res) {
-  transfer_header_ = req.zed_transfer.header;
-  comp_depth_image_msg_ = req.zed_transfer.depth_image;
-  comp_image_msg_ = req.zed_transfer.rgb_image;
-  res.success = true;
+void ZedSubscriber::getTransferCB(const zed_msgs::ZedTransfer::ConstPtr &msg) {
+  transfer_header_ = msg->header;
+  comp_depth_image_msg_ = msg->depth_image;
+  comp_image_msg_ = msg->rgb_image;
+  // res.success = true;
   got_msg_ = true;
   if (verbose_)
     ROS_INFO("Service freq is : %f", 1. / (ros::Time::now().toSec() - last_.toSec()));
   last_ = ros::Time::now();
-  return res.success;
+  // return res.success;
 }
 void ZedSubscriber::callback(const ros::WallTimerEvent &event) {
   if (!got_msg_)

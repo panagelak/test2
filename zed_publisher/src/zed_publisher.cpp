@@ -34,6 +34,7 @@ ZEDPublisher::ZEDPublisher(ros::NodeHandle &nh) : name_("zed_publisher"), nh_(nh
     PubDepthImage = nh_.advertise<sensor_msgs::Image>(ZedDepthImage_, 1);
     PubDepthCompressImage = nh_.advertise<sensor_msgs::CompressedImage>(ZedDepthImageComp_, 1);
   }
+  PubTransferCompressCombined = nh_.advertise<zed_msgs::ZedTransfer>(ZedTransfer_, 1);
   // Set the parameters of the camera
   sl::InitParameters ZEDParam;
   ZEDParam.camera_resolution = static_cast<sl::RESOLUTION>(resolution_);
@@ -57,7 +58,7 @@ ZEDPublisher::ZEDPublisher(ros::NodeHandle &nh) : name_("zed_publisher"), nh_(nh
   server_.setCallback(f_);
 
   // client
-  client_ = nh_.serviceClient<zed_msgs::ZedTransferService>(ZedTransfer_);
+  // client_ = nh_.serviceClient<zed_msgs::ZedTransferService>(ZedTransfer_);
 
   // Create Timer Callback
   Timer = nh_priv.createWallTimer(ros::WallDuration(1. / double(frequency_)), &ZEDPublisher::Publish, this);
@@ -79,12 +80,13 @@ void ZEDPublisher::retrieveAndCompressImage() {
 
   // === Compressing Image
   ros::Time now_compress_img = ros::Time::now();
-  TransferService_.request.zed_transfer.rgb_image = image_compressor_.encodeImage(
-      *ImgMsg, config_.img_format, config_.img_jpeg_quality, config_.img_jpeg_progressive, config_.img_jpeg_optimize,
-      config_.img_jpeg_restart_interval, config_.img_png_level);
+
+  TransferMsg_.rgb_image = image_compressor_.encodeImage(*ImgMsg, config_.img_format, config_.img_jpeg_quality,
+                                                         config_.img_jpeg_progressive, config_.img_jpeg_optimize,
+                                                         config_.img_jpeg_restart_interval, config_.img_png_level);
   if (verbose_img_)
     ROS_INFO("Image -> Compr Time : %f Size : %d", ros::Time::now().toSec() - now_compress_img.toSec(),
-             TransferService_.request.zed_transfer.rgb_image.data.size());
+             TransferMsg_.rgb_image.data.size());
 }
 void ZEDPublisher::retrieveAndCompressDepthImage() {
 
@@ -96,11 +98,11 @@ void ZEDPublisher::retrieveAndCompressDepthImage() {
 
   // === Compressing Depth Image
   ros::Time now_compress_dimg = ros::Time::now();
-  TransferService_.request.zed_transfer.depth_image = depth_image_compressor_.encodeDepthImage(
+  TransferMsg_.depth_image = depth_image_compressor_.encodeDepthImage(
       *DepthImgMsg, config_.depth_format, config_.depth_max, config_.depth_quantization, config_.depth_png_level);
   if (verbose_depth_)
     ROS_INFO("Depth -> Compr Time : %f Size : %d", ros::Time::now().toSec() - now_compress_dimg.toSec(),
-             TransferService_.request.zed_transfer.depth_image.data.size());
+             TransferMsg_.depth_image.data.size());
 }
 
 void ZEDPublisher::Publish(const ros::WallTimerEvent &event) {
@@ -115,18 +117,19 @@ void ZEDPublisher::Publish(const ros::WallTimerEvent &event) {
     if (!PubOnlyTransfer_) {
       PubImage.publish(ImgMsg);
       PubDepthImage.publish(DepthImgMsg);
-      PubCompressImage.publish(TransferService_.request.zed_transfer.rgb_image);
-      PubDepthCompressImage.publish(TransferService_.request.zed_transfer.depth_image);
+      PubCompressImage.publish(TransferMsg_.rgb_image);
+      PubDepthCompressImage.publish(TransferMsg_.depth_image);
     }
 
     // Call the Service
     ros::Time nows = ros::Time::now();
-    TransferService_.request.zed_transfer.header.frame_id = "";
-    TransferService_.request.zed_transfer.header.stamp = ros::Time::now();
-    if (!client_.call(TransferService_))
-      ROS_ERROR("Service not available");
-    if (verbose_depth_)
-      ROS_INFO("Calling service took %f", ros::Time::now().toSec() - nows.toSec());
+    TransferMsg_.header.frame_id = "";
+    TransferMsg_.header.stamp = ros::Time::now();
+    PubTransferCompressCombined.publish(TransferMsg_);
+    // if (!client_.call(TransferService_))
+    //  ROS_ERROR("Service not available");
+    // if (verbose_depth_)
+    //  ROS_INFO("Calling service took %f", ros::Time::now().toSec() - nows.toSec());
   }
 }
 

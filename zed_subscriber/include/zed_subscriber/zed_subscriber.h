@@ -29,7 +29,7 @@ public:
   ZedSubscriber();
 
 protected:
-  bool getTransferCB(zed_msgs::ZedTransferService::Request &req, zed_msgs::ZedTransferService::Response &res);
+  void getTransferCB(const zed_msgs::ZedTransfer::ConstPtr &msg);
   void callback(const ros::WallTimerEvent &event);
   std::string name_;
   ros::NodeHandle nh_;
@@ -39,8 +39,8 @@ protected:
   ros::Publisher depth_pub_;
   ros::Publisher pcl_pub_;
   ros::Publisher htp_input_pub_;
-
-  ros::ServiceServer server_;
+  ros::Subscriber sub_;
+  // ros::ServiceServer server_;
   ros::WallTimer Timer;
 
   sensor_msgs::Image depth_image_msg_;
